@@ -9,8 +9,8 @@ Personal Claude Code plugin marketplace.
 ## Install
 
 ```
-claude plugin marketplace add C:\src\tjo-claude-plugins
+claude plugin marketplace add trulsjo/tjo-claude-plugins
 claude plugin install explainer@tjo-claude-plugins
 ```
 
-Inside Claude Code: `/plugin marketplace add C:\src\tjo-claude-plugins`, then `/plugin install explainer@tjo-claude-plugins`.
+Inside Claude Code: `/plugin marketplace add trulsjo/tjo-claude-plugins`, then `/plugin install explainer@tjo-claude-plugins`.
