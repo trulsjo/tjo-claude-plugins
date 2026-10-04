@@ -16,7 +16,8 @@ owns every mechanical stage; you write two files and judge the frames.
 0. **Dependencies.** `python "${CLAUDE_SKILL_DIR}/ensure_deps.py"` - checks Python, Manim,
    piper-tts, ffmpeg, the Piper voice, and Kokoro with its model (about 340 MB, downloaded once),
    and installs what is missing (pip `--user`; ffmpeg via winget or brew). It also loads the
-   Kokoro model, and downloads it again when it does not load. Done when it prints
+   Kokoro model, and downloads it again when it does not load - once: a download that did
+   not help is not repeated until a model file or the error changes. Done when it prints
    `ready`. If it prints `NOT ready`, show the user the MISSING lines - they name the fix (on
    Linux, system packages that need sudo) - and stop. Kokoro is optional: `ready` with a MISSING
    kokoro line means the video will be narrated by Piper - tell the user and continue.

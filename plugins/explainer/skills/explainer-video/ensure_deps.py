@@ -7,12 +7,14 @@ Installs:
   ffmpeg             winget (Windows) / brew (macOS); on Linux prints the apt command (needs sudo)
   Piper voice        downloaded to ~/.cache/piper-voices
   Kokoro             pip install --user kokoro-onnx; model (~340 MB) downloaded to ~/.cache/kokoro-onnx,
-                     and downloaded again when it does not load (corrupt or truncated file)
+                     and downloaded again when it does not load (corrupt or truncated file);
+                     a download that did not help is not repeated until a file or the error changes
 Exit code 0 = ready; 1 = something is still missing (the report says what and how to fix it).
 Kokoro is optional: without it the run is still ready, and videos are narrated by Piper.
 """
 import argparse
 import importlib.util
+import json
 import platform
 import shutil
 import subprocess
@@ -26,6 +28,8 @@ KOKORO = "kokoro (optional)"
 PIP_PACKAGES = {"manim": "manim", "piper": "piper-tts"}
 KOKORO_DIR = Path.home() / ".cache" / "kokoro-onnx"
 KOKORO_FILES = ("kokoro-v1.0.onnx", "voices-v1.0.bin")
+KOKORO_RECORD = "download-did-not-help.json"
+KOKORO_NO_HELP = " - a fresh download did not help, so the model files are not the cause"
 KOKORO_URL = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/"
 WINGET_FFMPEG = Path.home() / "AppData/Local/Microsoft/WinGet/Packages"
 
@@ -100,14 +104,45 @@ def ensure_kokoro(check, report):
         have = importlib.util.find_spec("kokoro_onnx") is not None
     report.append((KOKORO, have, "installed" if have else "missing: kokoro-onnx"))
     problem, files = kokoro_model_problem(have)
-    fetched = set()
-    while problem and have and not check and set(files) - fetched:
+    record = KOKORO_DIR / KOKORO_RECORD
+    if problem and read_json(record) == kokoro_state(problem):
+        problem += KOKORO_NO_HELP
+        files = ()
+    tried, downloaded = set(), set()
+    # each file once: a second round is for a model that had one file missing and the other broken
+    while problem and have and not check and set(files) - tried:
         KOKORO_DIR.mkdir(parents=True, exist_ok=True)
-        for f in set(files) - fetched:  # each file once: a second round is for a model that had
-            download_kokoro_file(f)     # one file missing and the other one broken
-            fetched.add(f)
+        for f in set(files) - tried:
+            if download_kokoro_file(f):
+                downloaded.add(f)
+            tried.add(f)
         problem, files = kokoro_model_problem(have)
+    if not check:
+        try:
+            if not problem:
+                record.unlink(missing_ok=True)
+            # `files`: only a load failure is recorded, not a kokoro-onnx that cannot be imported
+            elif files and downloaded == set(KOKORO_FILES):
+                state = json.dumps(kokoro_state(problem))
+                problem += KOKORO_NO_HELP
+                record.write_text(state)
+        except OSError as e:  # without the record the next run downloads again; no worse than that
+            print(f"  could not update {record}: {e}")
     report.append((f"{KOKORO} model", not problem, problem or str(KOKORO_DIR)))
+
+
+def kokoro_state(problem):
+    """What a download that did not help is remembered by: the error, and each file's size and
+    modification time. JSON-shaped, so it compares equal to the record read back."""
+    stats = {f: (KOKORO_DIR / f).stat() for f in KOKORO_FILES if (KOKORO_DIR / f).exists()}
+    return {"problem": problem, "files": {f: [s.st_size, s.st_mtime_ns] for f, s in stats.items()}}
+
+
+def read_json(path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
 
 
 def kokoro_model_problem(installed):
@@ -117,7 +152,7 @@ def kokoro_model_problem(installed):
     if missing:
         return f"missing: {', '.join(missing)}", missing
     if not installed:
-        return None, ()
+        return "not checked - kokoro-onnx is missing", ()
     why = kokoro_import_problem()
     if why:  # not the model's fault, so a download would not help
         return f"not checked - kokoro-onnx cannot be imported ({why})", ()
@@ -157,6 +192,8 @@ def download_kokoro_file(f):
         part.replace(KOKORO_DIR / f)
     except OSError as e:
         print(f"  download failed: {e}")
+        return False
+    return True
 
 
 def main():
