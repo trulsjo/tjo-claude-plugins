@@ -36,17 +36,17 @@ owns every mechanical stage; you write two files and judge the frames.
      person says them ("C plus plus", "x squared", "arrow") - the engine reads text literally.
    - Scene ids are Python class names: `S01_hook`, `S02_syn`, ...
    - `"engine"` (optional) names the speech engine: `"kokoro"` or `"piper"`. Leave it out: Kokoro
-     narrates, and when Kokoro is unavailable the run falls back to Piper and prints one line
-     saying why. An unknown engine stops the run, and so does an explicit `"kokoro"` that is
-     unavailable.
+     narrates, and when Kokoro is unavailable (not installed, model missing or failing to load)
+     the run falls back to Piper and prints one line saying why. An unknown engine stops the
+     run, and so does an explicit `"kokoro"` that is unavailable.
    - `"voice"` (optional) is a voice of that engine:
      - Kokoro (English only): default `af_heart`. Names are `<accent><gender>_<name>` - `a`
        American, `b` British; `f` female, `m` male - e.g. `am_michael`, `bf_emma`, `bm_george`.
        A name Kokoro does not have stops the run with the full list of 28.
      - Piper: default `en_US-lessac-medium`. Each voice is about 60 MB, downloaded to
        `~/.cache/piper-voices` on first use; list them with
-       `python -m piper.download_voices --help`. A Piper voice needs `"engine": "piper"` - use
-       this for languages Kokoro lacks, such as Norwegian.
+       `python -m piper.download_voices --help`. A Piper voice with no `"engine"` key selects
+       Piper by itself - use this for languages Kokoro lacks, such as Norwegian.
 
    Done when every scene has `narration` and `visual`.
 

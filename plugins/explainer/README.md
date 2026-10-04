@@ -19,7 +19,7 @@ and checks one frame per scene before the final render. Nothing leaves the machi
 | Engine | When | Voices | Size |
 |---|---|---|---|
 | Kokoro-82M (via [`kokoro-onnx`](https://github.com/thewh1teagle/kokoro-onnx), Apache-2.0, CPU) | default | 28 English voices, American and British; default `af_heart` | model about 340 MB, downloaded once |
-| [Piper](https://github.com/OHF-Voice/piper1-gpl) | fallback when Kokoro is unavailable (the run prints one line saying why), or `"engine": "piper"` in `script.json` | many languages, including Norwegian; default `en_US-lessac-medium` | about 60 MB per voice |
+| [Piper](https://github.com/OHF-Voice/piper1-gpl) | fallback when Kokoro is unavailable (the run prints one line saying why), or `"engine": "piper"` or a Piper `"voice"` in `script.json` | many languages, including Norwegian; default `en_US-lessac-medium` | about 60 MB per voice |
 
 `script.json` takes optional `"engine"` (`"kokoro"` or `"piper"`) and `"voice"` keys. Kokoro has no
 Norwegian voice; use Piper for that.
