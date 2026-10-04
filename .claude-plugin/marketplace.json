@@ -1,0 +1,15 @@
+{
+  "name": "tjo-claude-plugins",
+  "owner": {
+    "name": "Truls Johnsen"
+  },
+  "description": "Truls Johnsen's personal Claude Code plugins.",
+  "plugins": [
+    {
+      "name": "explainer",
+      "source": "./plugins/explainer",
+      "description": "Narrated 3Blue1Brown-style explainer videos (Manim + local Piper voice + ffmpeg), with automatic dependency setup.",
+      "version": "0.1.0"
+    }
+  ]
+}

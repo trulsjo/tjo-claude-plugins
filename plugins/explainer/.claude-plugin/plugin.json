@@ -1,0 +1,6 @@
+{
+  "name": "explainer",
+  "version": "0.1.0",
+  "description": "Make narrated 3Blue1Brown-style explainer videos on any topic: Manim animation, local Piper text-to-speech, ffmpeg. Installs its own dependencies on first use.",
+  "author": { "name": "Truls Johnsen" }
+}
