@@ -3,13 +3,15 @@
 Usage:  python make_explainer.py <workdir> [--quality l|m|h] [--only S01_intro,...]
 
 <workdir> holds:
-  script.json  {"title": str, "voice": "en_US-lessac-medium",
+  script.json  {"title": str, "engine": "kokoro" | "piper" (optional), "voice": str (optional),
                 "scenes": [{"id": "S01_intro", "narration": "..."}, ...]}
   scenes.py    one Manim class per scene id, each subclassing NarratedScene
 
-Stages (a scene is rebuilt only when its own inputs change - narration, voice, scenes.py,
+With no "engine" key Kokoro narrates; when Kokoro is unavailable the run falls back to Piper.
+
+Stages (a scene is rebuilt only when its own inputs change - narration, engine, voice, scenes.py,
 its narration length, or the quality; signatures live in audio/*.sig and media/*.sig):
-  1. tts      narration -> audio/<id>.wav (Piper, local), durations.json
+  1. tts      narration -> audio/<id>.wav (Kokoro or Piper, both local), durations.json
   2. render   scenes.py class <id> -> media/.../<id>.mp4 (Manim)
   3. mux      video + audio -> segments/<quality>/<id>.mp4 (audio padded to the video length)
   4. frames   one PNG per scene -> check/<id>.png
@@ -22,11 +24,15 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import wave
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 VOICES = Path.home() / ".cache" / "piper-voices"
+KOKORO_DIR = Path.home() / ".cache" / "kokoro-onnx"
+KOKORO_FILES = ("kokoro-v1.0.onnx", "voices-v1.0.bin")
+DEFAULT_VOICE = {"kokoro": "af_heart", "piper": "en_US-lessac-medium"}
 FFMPEG_DIRS = [Path.home() / "AppData/Local/Microsoft/WinGet/Packages"]
 QUALITY = {"l": ("-ql", "480p15"), "m": ("-qm", "720p30"), "h": ("-qh", "1080p60")}
 
@@ -55,28 +61,90 @@ def changed(sig_file: Path, sig: str) -> bool:
     return not sig_file.exists() or sig_file.read_text(encoding="utf-8") != sig
 
 
-def tts(work: Path, script: dict) -> dict:
-    voice = script.get("voice", "en_US-lessac-medium")
+def piper_speaker(voice: str):
     VOICES.mkdir(parents=True, exist_ok=True)
     if not (VOICES / f"{voice}.onnx").exists():
         run([sys.executable, "-m", "piper.download_voices", "--download-dir", VOICES, voice])
+
+    def speak(text: str, wav: Path) -> None:
+        txt = wav.with_suffix(".txt")
+        txt.write_text(text, encoding="utf-8")
+        run([sys.executable, "-m", "piper", "--data-dir", VOICES, "-m", voice, "-f", wav,
+             "--input-file", txt])
+    return speak
+
+
+def kokoro_speaker(voice: str):
+    from kokoro_onnx import Kokoro
+    kokoro = Kokoro(*(str(KOKORO_DIR / f) for f in KOKORO_FILES))
+    english = [v for v in kokoro.get_voices() if v[0] in "ab"]  # a = American, b = British
+    if voice not in english:
+        sys.exit(f"{voice!r} is not a Kokoro voice - set \"engine\": \"piper\" for a Piper voice, "
+                 f"or pick one of: {', '.join(english)}")
+    lang = "en-gb" if voice[0] == "b" else "en-us"
+
+    def speak(text: str, wav: Path) -> None:
+        samples, rate = kokoro.create(text, voice=voice, lang=lang)
+        with wave.open(str(wav), "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(rate)
+            w.writeframes((samples * 32767).clip(-32768, 32767).astype("<i2").tobytes())
+    return speak
+
+
+ENGINES = {"kokoro": kokoro_speaker, "piper": piper_speaker}  # engine -> (voice -> speak(text, wav))
+
+
+def kokoro_problem():
+    """Why Kokoro cannot narrate, or None when it can."""
+    try:
+        import kokoro_onnx  # noqa: F401 - a broken install (e.g. onnxruntime) fails here too
+    except Exception as e:
+        return f"kokoro-onnx cannot be imported: {e}"
+    missing = [f for f in KOKORO_FILES if not (KOKORO_DIR / f).exists()]
+    return f"model file {KOKORO_DIR / missing[0]} is missing" if missing else None
+
+
+def pick_engine(script: dict, problem=kokoro_problem) -> tuple:
+    """(engine, voice) for this script: Kokoro unless the script says otherwise, Piper when
+    Kokoro is unavailable."""
+    engine, voice = script.get("engine"), script.get("voice")
+    if engine is not None and engine not in ENGINES:
+        sys.exit(f"unknown engine {engine!r} - valid engines: {', '.join(ENGINES)}")
+    if engine != "piper":
+        why = problem()
+        if why and engine == "kokoro":
+            sys.exit(f"Kokoro unavailable: {why} - run ensure_deps.py, or set \"engine\": \"piper\"")
+        if why:
+            if voice and "-" not in voice:  # a Kokoro voice name; Piper's are like en_US-name-medium
+                voice = None
+            voice = voice or DEFAULT_VOICE["piper"]
+            print(f"Kokoro unavailable ({why}) - narrating with Piper, voice {voice}")
+        engine = "piper" if why else "kokoro"
+    return engine, voice or DEFAULT_VOICE[engine]
+
+
+def tts(work: Path, scenes: list, engine: str, voice: str) -> dict:
     audio = work / "audio"
     audio.mkdir(exist_ok=True)
-    durations = {}
-    for sc in script["scenes"]:
-        wav, txt, sig_file = (audio / f"{sc['id']}{ext}" for ext in (".wav", ".txt", ".sig"))
-        sig = f"{voice}\n{sc['narration']}"
+    durations, speak, spent = {}, None, 0.0
+    for sc in scenes:
+        wav, sig_file = audio / f"{sc['id']}.wav", audio / f"{sc['id']}.sig"
+        sig = f"{engine}\n{voice}\n{sc['narration']}"
         if not wav.exists() or changed(sig_file, sig):
-            txt.write_text(sc["narration"], encoding="utf-8")
-            run([sys.executable, "-m", "piper", "--data-dir", VOICES, "-m", voice, "-f", wav,
-                 "--input-file", txt])
+            t0 = time.perf_counter()
+            speak = speak or ENGINES[engine](voice)  # loaded only when a scene needs speaking
+            speak(sc["narration"], wav)
+            spent += time.perf_counter() - t0
             sig_file.write_text(sig, encoding="utf-8")
         with wave.open(str(wav)) as w:
             durations[sc["id"]] = round(w.getnframes() / w.getframerate(), 3)
     dur_file, dur_json = work / "durations.json", json.dumps(durations, indent=1)
     if changed(dur_file, dur_json):
         dur_file.write_text(dur_json, encoding="utf-8")
-    print(f"tts: {len(durations)} clips, {sum(durations.values()):.1f} s of narration")
+    print(f"tts ({engine}, {voice}): {len(durations)} clips, {sum(durations.values()):.1f} s of "
+          f"narration, spoken in {spent:.1f} s")
     return durations
 
 
@@ -143,10 +211,11 @@ def main():
     work = a.workdir.resolve()
     script = json.loads((work / "script.json").read_text(encoding="utf-8"))
     ids = [s["id"] for s in script["scenes"]]
+    engine, voice = pick_engine(script)
     if a.only:
         for sid in a.only.split(","):
             (work / "media" / f"{sid}.{a.quality}.sig").unlink(missing_ok=True)
-    durations = tts(work, script)
+    durations = tts(work, script["scenes"], engine, voice)
     videos = render(work, ids, a.quality, durations)
     segs = mux(work, ids, videos, a.quality)
     frames(work, segs)
