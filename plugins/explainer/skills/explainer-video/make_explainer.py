@@ -8,6 +8,7 @@ Usage:  python make_explainer.py <workdir> [--quality l|m|h] [--only S01_intro,.
   scenes.py    one Manim class per scene id, each subclassing NarratedScene
 
 With no "engine" key Kokoro narrates; when Kokoro is unavailable the run falls back to Piper.
+A Piper voice name (it contains a hyphen) with no "engine" key selects Piper.
 
 Stages (a scene is rebuilt only when its own inputs change - narration, engine, voice, scenes.py,
 its narration length, or the quality; signatures live in audio/*.sig and media/*.sig):
@@ -74,10 +75,20 @@ def piper_speaker(voice: str):
     return speak
 
 
+class KokoroUnavailable(Exception):
+    """Kokoro is installed but its model does not load."""
+
+
 def kokoro_speaker(voice: str):
-    from kokoro_onnx import Kokoro
-    kokoro = Kokoro(*(str(KOKORO_DIR / f) for f in KOKORO_FILES))
-    english = [v for v in kokoro.get_voices() if v[0] in "ab"]  # a = American, b = British
+    try:
+        from kokoro_onnx import Kokoro
+        kokoro = Kokoro(*(str(KOKORO_DIR / f) for f in KOKORO_FILES))
+        voices = kokoro.get_voices()
+    except Exception as e:  # corrupt or truncated model file, runtime error on load
+        reason = (str(e).splitlines() or [""])[0]
+        raise KokoroUnavailable(f"model failed to load ({type(e).__name__}: {reason}); delete "
+                                f"{KOKORO_DIR} to download it again") from e
+    english = [v for v in voices if v[0] in "ab"]  # a = American, b = British
     if voice not in english:
         sys.exit(f"{voice!r} is not a Kokoro voice - set \"engine\": \"piper\" for a Piper voice, "
                  f"or pick one of: {', '.join(english)}")
@@ -108,21 +119,30 @@ def kokoro_problem():
 
 def pick_engine(script: dict, problem=kokoro_problem) -> tuple:
     """(engine, voice) for this script: Kokoro unless the script says otherwise, Piper when
-    Kokoro is unavailable."""
+    Kokoro is unavailable or the script names only a Piper voice."""
     engine, voice = script.get("engine"), script.get("voice")
     if engine is not None and engine not in ENGINES:
         sys.exit(f"unknown engine {engine!r} - valid engines: {', '.join(ENGINES)}")
+    if engine is None and voice and "-" in voice:  # Piper: en_US-name-medium, Kokoro: af_heart
+        engine = "piper"
     if engine != "piper":
         why = problem()
         if why and engine == "kokoro":
             sys.exit(f"Kokoro unavailable: {why} - run ensure_deps.py, or set \"engine\": \"piper\"")
         if why:
-            if voice and "-" not in voice:  # a Kokoro voice name; Piper's are like en_US-name-medium
-                voice = None
-            voice = voice or DEFAULT_VOICE["piper"]
+            voice = DEFAULT_VOICE["piper"]  # any voice the script named is a Kokoro one
             print(f"Kokoro unavailable ({why}) - narrating with Piper, voice {voice}")
         engine = "piper" if why else "kokoro"
     return engine, voice or DEFAULT_VOICE[engine]
+
+
+def narrate(work: Path, script: dict, engine: str, voice: str) -> dict:
+    """tts, re-picking the engine when Kokoro turns out not to load. The model loads before any
+    audio is written, so nothing is half done at that point."""
+    try:
+        return tts(work, script["scenes"], engine, voice)
+    except KokoroUnavailable as why:
+        return tts(work, script["scenes"], *pick_engine(script, lambda: str(why)))
 
 
 def tts(work: Path, scenes: list, engine: str, voice: str) -> dict:
@@ -215,7 +235,7 @@ def main():
     if a.only:
         for sid in a.only.split(","):
             (work / "media" / f"{sid}.{a.quality}.sig").unlink(missing_ok=True)
-    durations = tts(work, script["scenes"], engine, voice)
+    durations = narrate(work, script, engine, voice)
     videos = render(work, ids, a.quality, durations)
     segs = mux(work, ids, videos, a.quality)
     frames(work, segs)
