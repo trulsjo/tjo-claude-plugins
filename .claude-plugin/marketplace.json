@@ -9,7 +9,7 @@
       "name": "explainer",
       "source": "./plugins/explainer",
       "description": "Pick the clearest explanation format (prose, diagram, interactive page, video), and make narrated 3Blue1Brown-style explainer videos with automatic dependency setup.",
-      "version": "0.3.1"
+      "version": "0.3.2"
     }
   ]
 }

@@ -6,7 +6,8 @@ Installs:
   manim, piper-tts   pip install --user
   ffmpeg             winget (Windows) / brew (macOS); on Linux prints the apt command (needs sudo)
   Piper voice        downloaded to ~/.cache/piper-voices
-  Kokoro             pip install --user kokoro-onnx; model (~340 MB) downloaded to ~/.cache/kokoro-onnx
+  Kokoro             pip install --user kokoro-onnx; model (~340 MB) downloaded to ~/.cache/kokoro-onnx,
+                     and downloaded again when it does not load (corrupt or truncated file)
 Exit code 0 = ready; 1 = something is still missing (the report says what and how to fix it).
 Kokoro is optional: without it the run is still ready, and videos are narrated by Piper.
 """
@@ -98,20 +99,64 @@ def ensure_kokoro(check, report):
         pip_install("kokoro-onnx")
         have = importlib.util.find_spec("kokoro_onnx") is not None
     report.append((KOKORO, have, "installed" if have else "missing: kokoro-onnx"))
-    missing = [f for f in KOKORO_FILES if not (KOKORO_DIR / f).exists()]
-    if missing and have and not check:
+    problem, files = kokoro_model_problem(have)
+    fetched = set()
+    while problem and have and not check and set(files) - fetched:
         KOKORO_DIR.mkdir(parents=True, exist_ok=True)
-        for f in missing:
-            print(f"  downloading {KOKORO_URL}{f}")
-            part = KOKORO_DIR / f"{f}.part"  # renamed when complete, so a broken download is not used
-            try:
-                urllib.request.urlretrieve(KOKORO_URL + f, part)
-                part.replace(KOKORO_DIR / f)
-            except OSError as e:
-                print(f"  download failed: {e}")
-        missing = [f for f in KOKORO_FILES if not (KOKORO_DIR / f).exists()]
-    report.append((f"{KOKORO} model", not missing,
-                   str(KOKORO_DIR) if not missing else f"missing: {', '.join(missing)}"))
+        for f in set(files) - fetched:  # each file once: a second round is for a model that had
+            download_kokoro_file(f)     # one file missing and the other one broken
+            fetched.add(f)
+        problem, files = kokoro_model_problem(have)
+    report.append((f"{KOKORO} model", not problem, problem or str(KOKORO_DIR)))
+
+
+def kokoro_model_problem(installed):
+    """(why the model cannot narrate, the files to download); (None, ()) when it can.
+    The model is loaded only when kokoro-onnx is installed."""
+    missing = [f for f in KOKORO_FILES if not (KOKORO_DIR / f).exists()]
+    if missing:
+        return f"missing: {', '.join(missing)}", missing
+    if not installed:
+        return None, ()
+    why = kokoro_import_problem()
+    if why:  # not the model's fault, so a download would not help
+        return f"not checked - kokoro-onnx cannot be imported ({why})", ()
+    why = kokoro_load_problem()
+    # the error does not say which file is broken, so both are downloaded again
+    return (f"does not load ({why})", KOKORO_FILES) if why else (None, ())
+
+
+def kokoro_import_problem():
+    """Why kokoro-onnx is installed but cannot be imported (e.g. a broken onnxruntime), or None."""
+    try:
+        import kokoro_onnx  # noqa: F401
+    except Exception as e:
+        return first_line(e)
+    return None
+
+
+def kokoro_load_problem():
+    """Why the Kokoro model does not load, or None when it does. Takes a second or two."""
+    from kokoro_onnx import Kokoro
+    try:
+        Kokoro(*(str(KOKORO_DIR / f) for f in KOKORO_FILES)).get_voices()
+    except Exception as e:  # corrupt or truncated model file, runtime error on load
+        return first_line(e)
+    return None
+
+
+def first_line(e):
+    return f"{type(e).__name__}: {(str(e).splitlines() or [''])[0]}"
+
+
+def download_kokoro_file(f):
+    print(f"  downloading {KOKORO_URL}{f}")
+    part = KOKORO_DIR / f"{f}.part"  # renamed when complete, so a broken download is not used
+    try:
+        urllib.request.urlretrieve(KOKORO_URL + f, part)
+        part.replace(KOKORO_DIR / f)
+    except OSError as e:
+        print(f"  download failed: {e}")
 
 
 def main():

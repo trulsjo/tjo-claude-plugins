@@ -86,8 +86,8 @@ def kokoro_speaker(voice: str):
         voices = kokoro.get_voices()
     except Exception as e:  # corrupt or truncated model file, runtime error on load
         reason = (str(e).splitlines() or [""])[0]
-        raise KokoroUnavailable(f"model failed to load ({type(e).__name__}: {reason}); delete "
-                                f"{KOKORO_DIR} to download it again") from e
+        raise KokoroUnavailable(f"model in {KOKORO_DIR} failed to load ({type(e).__name__}: "
+                                f"{reason}); run ensure_deps.py to download it again") from e
     english = [v for v in voices if v[0] in "ab"]  # a = American, b = British
     if voice not in english:
         sys.exit(f"{voice!r} is not a Kokoro voice - set \"engine\": \"piper\" for a Piper voice, "
