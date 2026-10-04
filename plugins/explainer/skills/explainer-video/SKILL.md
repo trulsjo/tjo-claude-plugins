@@ -7,16 +7,18 @@ description: Make a narrated, 3Blue1Brown-style explainer video on any topic. Us
 
 A bespoke, **discardable** explainer: one topic, one viewer, built in minutes and thrown away after.
 
-Toolchain, all local and free: **Manim** (3Blue1Brown's animation library) draws, **Piper** speaks,
-**ffmpeg** joins. `make_explainer.py` (next to this file) owns every mechanical stage; you write two
-files and judge the frames.
+Toolchain, all local and free: **Manim** (3Blue1Brown's animation library) draws, **Kokoro** speaks
+(**Piper** when Kokoro is unavailable), **ffmpeg** joins. `make_explainer.py` (next to this file)
+owns every mechanical stage; you write two files and judge the frames.
 
 ## Steps
 
 0. **Dependencies.** `python "${CLAUDE_SKILL_DIR}/ensure_deps.py"` - checks Python, Manim,
-   piper-tts, ffmpeg and the Piper voice, and installs what is missing (pip `--user`; ffmpeg via
-   winget or brew). Done when it prints `ready`. If it prints `NOT ready`, show the user the MISSING
-   lines - they name the fix (on Linux, system packages that need sudo) - and stop.
+   piper-tts, ffmpeg, the Piper voice, and Kokoro with its model (about 340 MB, downloaded once),
+   and installs what is missing (pip `--user`; ffmpeg via winget or brew). Done when it prints
+   `ready`. If it prints `NOT ready`, show the user the MISSING lines - they name the fix (on
+   Linux, system packages that need sudo) - and stop. Kokoro is optional: `ready` with a MISSING
+   kokoro line means the video will be narrated by Piper - tell the user and continue.
 
 1. **Scope.** Settle topic, viewer and length. Default: 60-120 s, 4-7 scenes. Work in a fresh
    directory (the scratchpad unless the user names one). Done when you can state the one idea the
@@ -24,17 +26,27 @@ files and judge the frames.
 
 2. **Script** - write `script.json`:
    ```json
-   {"title": "How TCP handshakes work", "voice": "en_US-lessac-medium",
+   {"title": "How TCP handshakes work",
     "scenes": [{"id": "S01_hook", "narration": "...", "visual": "three packets cross between two hosts"},
                {"id": "S02_syn", "narration": "...", "visual": "..."}]}
    ```
    - One visual idea per scene, noted in `visual` (your plan for step 3; the pipeline ignores it).
      The narration names what is on screen as it appears.
    - Spoken English: about 150 words a minute, short sentences. Spell out symbols the way a
-     person says them ("C plus plus", "x squared", "arrow") - Piper reads text literally.
+     person says them ("C plus plus", "x squared", "arrow") - the engine reads text literally.
    - Scene ids are Python class names: `S01_hook`, `S02_syn`, ...
-   - `voice` is a Piper voice (about 60 MB each), downloaded to `~/.cache/piper-voices` on first
-     use. Other voices: `python -m piper.download_voices --help`.
+   - `"engine"` (optional) names the speech engine: `"kokoro"` or `"piper"`. Leave it out: Kokoro
+     narrates, and when Kokoro is unavailable the run falls back to Piper and prints one line
+     saying why. An unknown engine stops the run, and so does an explicit `"kokoro"` that is
+     unavailable.
+   - `"voice"` (optional) is a voice of that engine:
+     - Kokoro (English only): default `af_heart`. Names are `<accent><gender>_<name>` - `a`
+       American, `b` British; `f` female, `m` male - e.g. `am_michael`, `bf_emma`, `bm_george`.
+       A name Kokoro does not have stops the run with the full list of 28.
+     - Piper: default `en_US-lessac-medium`. Each voice is about 60 MB, downloaded to
+       `~/.cache/piper-voices` on first use; list them with
+       `python -m piper.download_voices --help`. A Piper voice needs `"engine": "piper"` - use
+       this for languages Kokoro lacks, such as Norwegian.
 
    Done when every scene has `narration` and `visual`.
 
@@ -75,7 +87,7 @@ files and judge the frames.
 ## Pipeline reference
 
 - A rerun rebuilds only the scenes whose inputs changed: an edited narration rebuilds that scene, a
-  changed voice rebuilds all of them, and each quality is cached separately.
+  changed engine or voice rebuilds all of them, and each quality is cached separately.
 - Any edit to `scenes.py` re-renders every scene. Iterate on one scene with Manim directly -
   `python -m manim render -ql scenes.py S02_syn` in the workdir - and run the pipeline once the
   scene looks right.
