@@ -1,6 +1,15 @@
 # explainer
 
-One skill, `explainer-video`: ask Claude for "an explainer video on X" and it writes a narrated
+Two skills:
+
+- **`explain`** - the ladder. Picks the lowest format that carries the idea (controlled prose ->
+  diagram -> interactive HTML page -> narrated video) and climbs one rung when an explanation did
+  not land. Each rung names a fallback that needs nothing installed; the video rung asks first.
+- **`explainer-video`** - the top rung, below.
+
+## explainer-video
+
+Ask Claude for "an explainer video on X" and it writes a narrated
 script, animates each scene with [Manim](https://www.manim.community/) (3Blue1Brown's library),
 voices it locally with [Piper](https://github.com/OHF-Voice/piper1-gpl), joins it with ffmpeg, and
 checks one frame per scene before the final render. Nothing leaves the machine; no API keys.
