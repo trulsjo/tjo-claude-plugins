@@ -27,7 +27,7 @@ rung adds.
    | 1 | **Controlled prose** (ASD-STE100 style) | One idea per sentence, at most 20 words. Active voice; name who does what. One term per thing, every time. The plainest exact word. Short vertical lists for anything with three or more parts. |
    | 2 | **Diagram** | Use a diagram skill if one is available (e.g. `oh-my-claudecode:diagram`). Otherwise a Mermaid block where markdown renders, or an ASCII box-and-arrow sketch in a terminal. Label every arrow with what flows along it. |
    | 3 | **Interactive HTML page** | One self-contained `.html` file: inline CSS/JS, controls that change the picture live. Publish it with the Artifact tool when that tool exists; otherwise write the file and give its path. |
-   | 4 | **Narrated explainer video** | Invoke `explainer:explainer-video`. **Ask first**: it may install packages and takes minutes to render. |
+   | 4 | **Narrated explainer video** | Invoke `explainer:make-video`. **Ask first**: it may install packages and takes minutes to render. |
 
    Done when the explanation meets every rule in its row.
 

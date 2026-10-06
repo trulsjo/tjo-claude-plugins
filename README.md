@@ -4,7 +4,7 @@ Personal Claude Code plugin marketplace.
 
 | Plugin | What it does |
 |---|---|
-| [explainer](plugins/explainer) | `explain`: picks the clearest explanation format (prose, diagram, page, video). `explainer-video`: narrated 3Blue1Brown-style videos. |
+| [explainer](plugins/explainer) | `explain`: picks the clearest explanation format (prose, diagram, page, video). `make-video`: narrated 3Blue1Brown-style videos. |
 
 ## Install
 

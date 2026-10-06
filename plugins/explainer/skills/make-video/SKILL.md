@@ -1,9 +1,9 @@
 ---
-name: explainer-video
+name: make-video
 description: Make a narrated, 3Blue1Brown-style explainer video on any topic. Use when asked to explain something as a video or animation.
 ---
 
-# explainer-video
+# make-video
 
 A bespoke, **discardable** explainer: one topic, one viewer, built in minutes and thrown away after.
 
