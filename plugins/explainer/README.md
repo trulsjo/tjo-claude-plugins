@@ -5,9 +5,9 @@ Two skills:
 - **`explain`** - the ladder. Picks the lowest format that carries the idea (controlled prose ->
   diagram -> interactive HTML page -> narrated video) and climbs one rung when an explanation did
   not land. Each rung names a fallback that needs nothing installed; the video rung asks first.
-- **`explainer-video`** - the top rung, below.
+- **`make-video`** - the top rung, below.
 
-## explainer-video
+## make-video
 
 Ask Claude for "an explainer video on X" and it writes a narrated
 script, animates each scene with [Manim](https://www.manim.community/) (3Blue1Brown's library),
@@ -29,7 +29,7 @@ videos as the top rung for understanding LLM output.
 
 ## Dependencies
 
-The skill's first step runs `skills/explainer-video/ensure_deps.py`, which checks and installs:
+The skill's first step runs `skills/make-video/ensure_deps.py`, which checks and installs:
 
 | Dependency | How it is installed |
 |---|---|
@@ -42,4 +42,4 @@ The skill's first step runs `skills/explainer-video/ensure_deps.py`, which check
 On Linux, Manim also needs `libcairo2-dev libpango1.0-dev pkg-config python3-dev` (sudo; printed if
 the pip install fails). LaTeX is not needed: the skill uses plain `Text` with Unicode maths.
 
-Check without installing anything: `python skills/explainer-video/ensure_deps.py --check`.
+Check without installing anything: `python skills/make-video/ensure_deps.py --check`.
