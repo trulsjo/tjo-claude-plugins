@@ -1,0 +1,13 @@
+session:
+  # We chose Redis over Memcached for sessions because sessions must survive a cache restart.
+  backend: redis
+  ttl_seconds: 3600
+  # Must stay below the load balancer's 60 s idle timeout, or it drops the connection mid-request.
+  keepalive_seconds: 55
+
+ingress:
+  # ingress-nginx silently ignores proxy timeouts above 3600 s (an upstream bug), so cap the value here.
+  proxy_timeout_seconds: 3600
+
+# replicas: 4
+replicas: 2

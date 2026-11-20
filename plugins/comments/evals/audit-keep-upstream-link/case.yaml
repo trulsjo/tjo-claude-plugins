@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-keep-upstream-link
+description: Upstream workarounds that cite the upstream issue or spec are kept; the audit reports no findings.
+tags: [audit, negative]
+context:
+  scaffold_script: scaffold.sh

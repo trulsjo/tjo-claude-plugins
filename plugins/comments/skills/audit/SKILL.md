@@ -11,7 +11,7 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively), or the whole repo when the user asks for it; with neither, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when you have the file list. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
+2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively), or the whole repo when the user asks for it; with neither, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
@@ -26,6 +26,8 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 8. **Write the report** in chat, in the format below. Done when every finding from step 4 is in it, under `### Applied` or its fix size, with what step 7 created.
 
 ## Report format
+
+The reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding.
 
 Groups in this order, each a heading, empty groups left out: `### Trivial`, `### Local refactor`, `### Ticket`, `### ADR`. Each finding:
 

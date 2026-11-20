@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-repo-standard-wins
+description: "The repo's coding standards require a docstring on every function, so signature-repeating docstrings are not class 10 findings; the audit reports no findings."
+tags: [audit]
+context:
+  scaffold_script: scaffold.sh
