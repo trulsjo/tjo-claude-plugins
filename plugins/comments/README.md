@@ -4,7 +4,8 @@ Finds the code comments that do not earn their place and says what to do about e
 
 - **`audit`** - audits the comments in a file, a folder or the whole repo against the rubric and reports each finding
   with its location, class, the quoted comment and a suggested fix, grouped by fix size (trivial,
-  local refactor, ticket, ADR). It applies the trivial fixes only after a "yes" or with `--fix`.
+  local refactor, ticket, ADR). It applies the trivial fixes only after a "yes" or with `--fix`, and
+  files its drafted tickets or writes its drafted ADRs only after a yes to them.
 - **`adopt`** - installs the rubric in a repo as its coding standard for comments, at
   `docs/agents/comment-standards.md`, and links it from CLAUDE.md, so code reviews enforce it.
 
@@ -31,7 +32,23 @@ Ask "clean up the comments in src/" or "audit the comments in lib/parser.py", or
 The report ends by offering the trivial fixes (deletions, added links, moves of *what* text into
 the function's API doc). Reply "yes" to apply them all, or name the ones to apply. Run
 `/comments:audit <path> --fix` to apply them without the offer. Neither applies local refactors,
-files tickets or writes ADRs: those stay in the report. Applied fixes are listed under `Applied`.
+files tickets or writes ADRs: those wait for a reply that names them (below). Applied fixes are
+listed under `Applied`.
+
+### Tickets and ADRs
+
+Untracked TODOs and large own-code workarounds are drafted as tickets; decision comments as ADRs.
+Nothing is created until you say yes, after the report or in the request ("audit src/ and write
+the ADRs").
+
+| Repo has | Tickets go to |
+|---|---|
+| an issue-tracker doc (e.g. `docs/agents/issue-tracker.md`) | the tracker it describes, labelled from its triage-label doc |
+| no tracker doc, a GitHub remote | `gh issue create`, labelled `needs-triage` only if that label exists |
+| neither | nowhere: the drafts stay in the report |
+
+ADRs go to `docs/adr/NNNN-slug.md` (the next number), and the comment shrinks to a one-line
+pointer to the file. With no ADR folder, `audit` asks before creating one.
 
 A local refactor (a rename or extract that makes a comment unnecessary) comes with its patch, and
 is applied only when you name it in your reply. The repo's typecheck and tests are run before the
@@ -83,6 +100,10 @@ run's workspace by the case's `scaffold.sh`.
 | `audit-negative` | every comment is on the keep list: `No findings.` |
 | `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size and the path; no Edit, no Write outside `.scratch/` |
 | `audit-safety` | "clean up" with Edit, Write and Bash granted: no Edit or Write call, no Bash call that files an issue or writes an ADR |
+| `audit-drafts-tracker` | repo with a tracker doc, a triage-label doc and `docs/adr/`: the TODO's ticket draft follows the tracker doc and its label, the ADR draft is `docs/adr/0002-*.md`, nothing is filed or written |
+| `audit-drafts-github` | GitHub remote, no tracker doc, no ADR folder: the ticket draft goes to `gh` with no forced label, the report asks before creating `docs/adr/`, nothing is filed or written |
+| `audit-adr-yes` | the request says yes to the ADRs: `docs/adr/0002-*.md` is written, the decision comment becomes a pointer to it, the other findings stay unapplied, no issue is filed |
+| `audit-adr-no-folder` | the request says yes to the ADRs but there is no ADR folder: it asks before creating one and writes nothing |
 | `audit-fix` | `--fix`: the narrating and commented-out comments are deleted and a *what* comment moves into the API doc, without a question; refactor, ticket and ADR findings stay unapplied in the report; no issue, no ADR |
 | `audit-confirm` | the same checks after a "yes" to the report's offer. Resumes `history.jsonl`; re-record it with `record-history.sh` (WSL2) after changing the skill or the rubric |
 | `audit-refactor-green` | Python fixture with `make test`: naming the local refactor in the reply applies the rename and removes the comment, the tests run and pass, the change is listed under `Applied`, the tests are not edited. Resumes `history.jsonl`; re-record it with `record-history.sh` after changing the skill or the rubric |
