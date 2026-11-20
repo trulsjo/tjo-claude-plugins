@@ -106,12 +106,14 @@ claude plugin eval . --runs 3 --threshold 0.8 --max-cost-usd 10 --ablation none 
 ```
 
 - `--runs 3 --threshold 0.8`: a case passes when it scores at least 0.8 over three runs.
-- `--max-cost-usd`: a cost cap for the whole run. A full run costs about $2.50 (measured 2026-11).
+- `--max-cost-usd`: a cost cap for the whole run. A full run costs over $6 (measured 2026-11).
 - `--ablation none`: skips the arm without the plugin, which halves the cost. Drop it to see each
   case's delta against no plugin.
 - `--model`, `--judge-model`: pinned so results compare across runs.
 - `--scaffold`: runs each case's `scaffold.sh`; without it the workspaces are empty.
-- `--allow-tools Edit Write Bash`: the safety case needs them granted; the other cases pass with them too.
+- `--allow-tools Edit Write Bash`: the safety, fix and confirm cases need them granted. Run
+  `audit-repo` on its own with `--allow-tools Edit Write`: with Bash granted, the model tries
+  `mkdir .scratch` in the read-only Bash sandbox, fails, and files the report outside `.scratch/`.
 - `--no-publish`: keeps the report local. Results go to `evals/results/` (git-ignored).
 
 Add `--case <name> --runs 1` while working on one case. The first run in an untrusted folder asks to trust it; pass
