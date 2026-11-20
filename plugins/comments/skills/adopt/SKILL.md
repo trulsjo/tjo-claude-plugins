@@ -1,6 +1,6 @@
 ---
 name: adopt
-description: Install the comment rubric in a repo as its coding standard for comments - a versioned copy at docs/agents/comment-standards.md, linked from CLAUDE.md, so code reviews enforce it. Use when the user wants comment standards or comment rules set up, installed or updated in a repo.
+description: Install the comment rubric in a repo as its coding standard for comments - a versioned copy at docs/agents/comment-standards.md, linked from CLAUDE.md, so code reviews enforce it. Use when the user wants comment standards or comment rules set up or updated in a repo.
 ---
 
 # adopt

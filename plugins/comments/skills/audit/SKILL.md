@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Comment hygiene audit - report which code comments in a file, a folder, the whole repo, a diff or a pull request to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
+description: Comment hygiene audit - report which code comments in a file, a folder, the whole repo, a diff or a pull request to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs.
 ---
 
 # audit
