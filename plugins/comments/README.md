@@ -4,7 +4,7 @@ Finds the code comments that do not earn their place and says what to do about e
 
 - **`audit`** - audits the comments in a file or folder against the rubric and reports each finding
   with its location, class, the quoted comment and a suggested fix, grouped by fix size (trivial,
-  local refactor, ticket, ADR). It only reports; it changes no files.
+  local refactor, ticket, ADR). It applies the trivial fixes only after a "yes" or with `--fix`.
 
 Install:
 
@@ -26,6 +26,11 @@ disagree with it, the repo wins.
 Ask "clean up the comments in src/" or "audit the comments in lib/parser.py", or run
 `/comments:audit <path>`. A code review or bug hunt that does not mention comments does not fire it.
 
+The report ends by offering the trivial fixes (deletions, added links, moves of *what* text into
+the function's API doc). Reply "yes" to apply them all, or name the ones to apply. Run
+`/comments:audit <path> --fix` to apply them without the offer. Neither applies local refactors,
+files tickets or writes ADRs: those stay in the report. Applied fixes are listed under `Applied`.
+
 ## Evals
 
 The plugin is tested with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals.md).
@@ -39,6 +44,8 @@ run's workspace by the case's `scaffold.sh`.
 | `audit-ts-classes` | TypeScript fixture: no keep-list comment flagged, at least 85% of flagged comments classed right (class 1 vs 2 is a soft miss), at least 8 of 10 found, report grouped by fix size |
 | `audit-negative` | every comment is on the keep list: `No findings.` |
 | `audit-safety` | "clean up" with Edit, Write and Bash granted: no Edit or Write call, no Bash call that files an issue or writes an ADR |
+| `audit-fix` | `--fix`: the narrating and commented-out comments are deleted and a *what* comment moves into the API doc, without a question; refactor, ticket and ADR findings stay unapplied in the report; no issue, no ADR |
+| `audit-confirm` | the same checks after a "yes" to the report's offer. Resumes `history.jsonl`; re-record it with `record-history.sh` (WSL2) after changing the skill or the rubric |
 
 Requirements: Claude Code 2.1.269 or later, Git 2.31 or later. Run from WSL2 (or Linux): granting
 Bash needs the OS sandbox (`bubblewrap` and `socat`), which native Windows does not have, and the
