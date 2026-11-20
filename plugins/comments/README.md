@@ -101,7 +101,10 @@ replaced only after you confirm.
 The plugin is tested with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals.md).
 Cases live in [`evals/`](evals); fixtures are plain files under `evals/fixtures/`, copied into each
 run's workspace by the case's `scaffold.sh`. The diff cases' scaffolds run
-`evals/fixtures/diff-repo/build.sh`, which builds a git repo with a `main` and a `feature` branch.
+`evals/fixtures/diff-repo/build.sh`, which builds a git repo with a `main` and a `feature` branch. A case that resumes a conversation
+keeps its first turn in `history.jsonl`, recorded by its `record-history.sh` through the shared
+[`evals/record-history.sh`](evals/record-history.sh), which keeps only the conversation (the repo
+is public).
 
 | Case | Checks |
 |---|---|
