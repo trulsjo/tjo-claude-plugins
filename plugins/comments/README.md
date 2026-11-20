@@ -129,12 +129,15 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
 From the plugin folder (`/mnt/c/.../plugins/comments` in WSL2):
 
 ```
-claude plugin eval . --runs 3 --threshold 0.8 --max-cost-usd 10 --ablation none \
+claude plugin eval . --runs 3 --threshold 1.0 --max-cost-usd 10 --ablation none \
   --model claude-sonnet-4-6 --judge-model claude-sonnet-4-6 \
   --scaffold --no-publish --allow-tools Edit Write Bash
 ```
 
-- `--runs 3 --threshold 0.8`: a case passes when it scores at least 0.8 over three runs.
+- `--runs 3 --threshold 1.0`: a case passes only when every check passes in all three runs
+  (PASS% 100). The tool compares the threshold with the case's *average* check score, so a lower
+  threshold lets a case show ✓ while most of its runs fail: at 0.8, `audit-repo` once showed ✓ at
+  0.90 with PASS% 33%, two runs having dropped whole folders. Read the PASS% column, not only the ✓.
 - `--max-cost-usd`: a cost cap for the whole run. A full run costs over $6 (measured 2026-11).
 - `--ablation none`: skips the arm without the plugin, which halves the cost. Drop it to see each
   case's delta against no plugin.
@@ -175,6 +178,7 @@ standard; the check requires the citation.
 
 ## Release checklist
 
-1. Run the eval suite (above) and check every case scores at least the 0.8 threshold.
+1. Run the eval suite (above) and check every case shows PASS% 100 over 3 runs. A run that fails
+   any check is a skill bug or a brittle grader: fix it and re-run that case before releasing.
 2. Run `integration/code-review.sh` and check it prints `PASS`.
 3. Record the date, the plugin version and the `PASS` line in the release ticket.
