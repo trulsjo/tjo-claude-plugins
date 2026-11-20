@@ -124,3 +124,35 @@ claude plugin eval . --runs 3 --threshold 0.8 --max-cost-usd 10 --ablation none 
 
 Add `--case <name> --runs 1` while working on one case. The first run in an untrusted folder asks to trust it; pass
 `--trust-plugin` when running without a terminal.
+
+## code-review integration check
+
+Eval runs load only this plugin, so they cannot show that a real review picks up the adopted
+doc. [`integration/code-review.sh`](integration/code-review.sh) does, with your normal Claude Code
+config:
+
+1. builds a temporary git repo (a TypeScript file, a spec, an issue-tracker doc),
+2. runs `/comments:adopt` with this folder as `--plugin-dir` and commits the result on `main`,
+3. adds a narrating (class 1) comment on a branch,
+4. runs `/mattpocock-skills:code-review main` through `claude -p`,
+5. passes when the `## Standards` section cites `comment-standards.md` for the planted comment.
+
+```
+plugins/comments/integration/code-review.sh            # exit 0 pass, 1 finding missing, 2 setup problem
+plugins/comments/integration/code-review.sh --skip-adopt   # the same repo without adopt: must fail
+```
+
+It needs `mattpocock-skills` installed and enabled, and a claude.ai subscription login: it unsets
+API-key, Bedrock, Vertex and Foundry variables and stops unless `claude auth status` reports a
+claude.ai login. Both runs use `--model sonnet` (change with `--model`) and a budget cap; a run
+takes a few minutes. `--keep` keeps the temporary repo and the two outputs. Runs from Git Bash on
+Windows, WSL2 or Linux.
+
+Without adopt, code-review may still flag the comment from its smell baseline, but it cites no
+standard; the check requires the citation.
+
+## Release checklist
+
+1. Run the eval suite (above) and check every case scores at least the 0.8 threshold.
+2. Run `integration/code-review.sh` and check it prints `PASS`.
+3. Record the date, the plugin version and the `PASS` line in the release ticket.
