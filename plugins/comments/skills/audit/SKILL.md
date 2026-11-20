@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Comment hygiene audit - report which code comments in a file, a folder or the whole repo to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
+description: Comment hygiene audit - report which code comments in a file, a folder, the whole repo, a diff or a pull request to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
 ---
 
 # audit
@@ -11,7 +11,7 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively), or the whole repo when the user asks for it; with neither, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
+2. **Fix the scope.** The target is what the user named: a pull request (a number, `#12` or a PR URL), a path that exists (a file or a folder, recursively), the whole repo when the user asks for it, or else a git ref. For a PR or a ref, follow [Diff scope](#diff-scope) in place of the rest of this step. With no target, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
@@ -24,6 +24,18 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 7. **Act on a yes in the request.** When the request itself says yes to the tickets or the ADRs, create them now by [On confirmation](#on-confirmation); otherwise skip this step. A yes to the ADRs writes the **ready** ADRs only. A **waiting** ADR stays a draft whatever the request said, because a yes to the ADRs never covers creating the folder: where decisions live is the user's choice of repo structure, which a yes to the ADRs does not make. For it this turn runs no `mkdir` and writes no file, and the report asks `Create docs/adr/ for these ADRs?`. Done when each confirmed ticket is filed, each ready ADR written, and each waiting ADR untouched, or the step was skipped.
 
 8. **Write the report** in chat, in the format below. Done when every finding from step 4 is in it, under `### Applied` or its fix size, with what step 7 created.
+
+## Diff scope
+
+A ref or a PR scopes the audit to the **changed comment lines**: comments on the `+` lines of the diff, in files the rubric's scope covers. Context lines and `-` lines are outside the scope, even inside a hunk. Steps 3 to 8 then run as usual, judging only the comments in scope; the rest of each file is context for the verdict. A diff run reports in chat whatever its size: it is never a repo run.
+
+1. **Get the diff** from the one command for the target. When it fails, the audit ends there with that target's message, and nothing is classified: the user named this ref or PR, so no other base or local branch stands in for it. Done when you hold the diff text, or have stopped.
+   - Ref: `git rev-parse --verify --quiet "<ref>^{commit}"` checks it; on failure the message is `<ref> is not a ref in this repo; nothing was audited.` Then `git diff --merge-base <ref>`: the change since the branch left the ref, uncommitted edits included.
+   - PR: `gh pr diff <number>`; on failure the message is `Could not fetch the diff of PR #<number>: <gh's error>. Nothing was audited.`
+2. **Stop on an empty diff**: the diff command piped to `wc -l` prints `0`. An empty diff is the answer for this base. Stop with `The diff since <ref> is empty; nothing was audited.` (for a PR: `PR #<number> has an empty diff; nothing was audited.`). A diff with changes but no changed comment lines is not empty: it gets the normal report with `No findings.`
+3. **Widen with `--touched`** when the user passes it or asks for touched code: the scope also takes every comment already inside a **touched function**: the innermost function or method that holds a `+` or `-` line, its doc comment included. Functions the diff does not touch stay outside. Done when you can name each touched function.
+
+Locations in the report are line numbers in the new version of the file. For a PR, read that version at the PR's head (`git fetch origin pull/<number>/head`, then `git show FETCH_HEAD:<path>`); when that fetch fails, judge from the diff hunks, which carry their own line numbers.
 
 ## Report format
 
