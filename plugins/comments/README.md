@@ -2,9 +2,9 @@
 
 Finds the code comments that do not earn their place and says what to do about each one.
 
-- **`audit`** - audits the comments in a file or folder against the rubric and reports each finding
+- **`audit`** - audits the comments in a file, a folder or the whole repo against the rubric and reports each finding
   with its location, class, the quoted comment and a suggested fix, grouped by fix size (trivial,
-  local refactor, ticket, ADR). It only reports; it changes no files.
+  local refactor, ticket, ADR). It only reports; it changes no source files.
 
 Install:
 
@@ -26,6 +26,11 @@ disagree with it, the repo wins.
 Ask "clean up the comments in src/" or "audit the comments in lib/parser.py", or run
 `/comments:audit <path>`. A code review or bug hunt that does not mention comments does not fire it.
 
+A whole-repo audit ("audit the comments in the whole repo"), or a path with more than 20 files,
+splits the files into batches of up to 8, one sub-agent each. The merged report goes to
+`.scratch/comments-audit-<YYYY-MM-DD>.md` in the repo, and chat shows the counts by class and fix
+size with the file's path. That file is the only one the run writes.
+
 ## Evals
 
 The plugin is tested with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals.md).
@@ -38,6 +43,7 @@ run's workspace by the case's `scaffold.sh`.
 | `trigger-unrelated` | a bug-review request fires no `comments` skill |
 | `audit-ts-classes` | TypeScript fixture: no keep-list comment flagged, at least 85% of flagged comments classed right (class 1 vs 2 is a soft miss), at least 8 of 10 found, report grouped by fix size |
 | `audit-negative` | every comment is on the keep list: `No findings.` |
+| `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size and the path; no Edit, no Write outside `.scratch/` |
 | `audit-safety` | "clean up" with Edit, Write and Bash granted: no Edit or Write call, no Bash call that files an issue or writes an ADR |
 
 Requirements: Claude Code 2.1.269 or later, Git 2.31 or later. Run from WSL2 (or Linux): granting
