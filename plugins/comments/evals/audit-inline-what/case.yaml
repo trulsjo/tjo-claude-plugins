@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-inline-what
+description: "A public function with no doc comment is not a finding; an inline comment that states what a function does and promises is moved into its docstring."
+tags: [audit]
+context:
+  scaffold_script: scaffold.sh

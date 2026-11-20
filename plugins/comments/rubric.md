@@ -17,7 +17,7 @@ These are never findings:
 
 - **Contract API docs**: a doc comment that says what the unit does and promises (inputs, outputs, errors, units, side effects).
 - **Upstream workarounds with a link**: class 4 comments that cite the upstream issue, version or spec section.
-- **Constraint-whys**: a reason the code cannot express ("the provider rejects fractional cents", "must run before X is loaded").
+- **Constraint-whys**: a reason the code cannot express ("the provider rejects fractional cents", "must run before X is loaded"). A requirement set outside our code that holds by design (hardware, a protocol, a provider's rules, a resource limit) is a constraint-why and needs no link; class 4 is only for a workaround to a defect or quirk that upstream could fix.
 - **License and copyright headers.**
 - **Tool directives**: `eslint-disable`, `#pragma`, `# type: ignore`, `// nolint`, `# shellcheck disable` and the like.
 - **Ticketed TODOs**: a TODO or FIXME that names a ticket (`TODO(#142)`, `FIXME JIRA-881`, a tracker URL).

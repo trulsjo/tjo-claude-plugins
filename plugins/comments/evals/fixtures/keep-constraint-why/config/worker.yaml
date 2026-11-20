@@ -1,0 +1,4 @@
+worker:
+  # Must stay at 1: the job writes to a SQLite file, which allows one writer at a time.
+  concurrency: 1
+  queue: exports

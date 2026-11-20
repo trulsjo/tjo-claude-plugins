@@ -98,6 +98,12 @@ run's workspace by the case's `scaffold.sh`.
 | `trigger-unrelated` | a bug-review request fires no `comments` skill |
 | `audit-ts-classes` | TypeScript fixture: no keep-list comment flagged, at least 85% of flagged comments classed right (class 1 vs 2 is a soft miss), at least 8 of 10 found, report grouped by fix size |
 | `audit-negative` | every comment is on the keep list: `No findings.` |
+| `audit-polyglot-classes` | Python, C++, shell and YAML fixture covering all 10 classes: same pass bar as `audit-ts-classes`, at least 11 of 13 found |
+| `audit-keep-*` | one case per keep-list item (linked upstream workaround, constraint-why, contract API doc, license header, tool directives, ticketed TODO), across Python, C++, shell and YAML: `No findings.` |
+| `audit-upstream-no-link` | an upstream workaround with no link or version: one class 4 finding whose fix adds the link |
+| `audit-markdown-ignored` | Markdown files in the audited path: `No findings.` and no `.md` location |
+| `audit-repo-standard-wins` | the repo's standards require a docstring on every function: no class 10 findings |
+| `audit-inline-what` | an inline comment holding the function's *what* is moved into its docstring; a public function with no docstring is not flagged |
 | `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size and the path; no Edit, no Write outside `.scratch/` |
 | `audit-repo-fix-ignored` | the same whole-repo run asked with `--fix`: a repo run does not take it, so the report is filed and the summary says so and ends with the offer; no Edit, no Write outside `.scratch/`, the source files are unchanged |
 | `audit-repo-confirm` | a "yes" to a repo run's summary: the filed report's trivial fixes are applied in the TypeScript, YAML, shell and Python files; refactor, ticket and ADR findings stay unapplied; no issue, no ADR. Resumes `history.jsonl` with the filed report in `scratch/`; re-record both with `record-history.sh` (WSL2) after changing the skill or the rubric |

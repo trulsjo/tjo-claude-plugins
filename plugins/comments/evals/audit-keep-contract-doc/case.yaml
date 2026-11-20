@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-keep-contract-doc
+description: Doc comments that state a unit's contract are kept; the audit reports no findings.
+tags: [audit, negative]
+context:
+  scaffold_script: scaffold.sh
