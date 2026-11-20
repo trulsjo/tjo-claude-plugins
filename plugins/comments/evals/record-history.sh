@@ -28,8 +28,9 @@ trap 'rm -rf "$work"' EXIT
 cd "$work"
 bash "$case_dir/$scaffold"
 session="$(cat /proc/sys/kernel/random/uuid)"
-claude -p "$prompt" --session-id "$session" \
-  --plugin-dir "$plugin_dir" --add-dir "$plugin_dir" --setting-sources project \
+# No MCP servers, the claude.ai connectors included: the turn has only the tools named here.
+ENABLE_CLAUDEAI_MCP_SERVERS=false claude -p "$prompt" --session-id "$session" \
+  --plugin-dir "$plugin_dir" --add-dir "$plugin_dir" --setting-sources project --strict-mcp-config \
   --model claude-sonnet-4-6 --tools "$@" --permission-mode acceptEdits >/dev/null
 if [ "$keep_scratch" = 1 ]; then
   reports=("$work"/.scratch/*.md)
@@ -39,10 +40,14 @@ if [ "$keep_scratch" = 1 ]; then
   cp "${reports[@]}" "$case_dir/scratch/"
 fi
 transcript="$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects" -name "$session.jsonl" | head -n 1)"
-python3 - "$transcript" "$case_dir/history.jsonl" "$work" <<'PY'
+python3 - "$transcript" "$case_dir/history.jsonl" "$work" "$@" <<'PY'
 import json, sys
-src, dst, work = sys.argv[1], sys.argv[2], sys.argv[3]
+src, dst, work, tools = sys.argv[1], sys.argv[2], sys.argv[3], set(sys.argv[4:])
 entries = [json.loads(line) for line in open(src, encoding="utf-8")]
+used = {b.get("name") for e in entries if e.get("type") == "assistant"
+        for b in e["message"].get("content", []) if isinstance(b, dict) and b.get("type") == "tool_use"}
+if used - tools:
+    sys.exit(f"the turn used tools it was not given: {sorted(used - tools)}; nothing written")
 for e in entries:
     for field in e:
         if field != "cwd":
