@@ -7,6 +7,7 @@
 # The transcript is cut down to the conversation: user and assistant entries, plus the date
 # attachment. Every other attachment is dropped, because they carry account data: ids, the
 # account's email, the org's connector setup (MCP instructions), its skill listing, local paths.
+# Thinking blocks are dropped from assistant entries (their signature encodes the org id).
 # The parent links are rejoined around the dropped entries. The repo is public: keep this an
 # allowlist.
 set -euo pipefail
@@ -26,9 +27,15 @@ import json, sys
 src, dst = sys.argv[1], sys.argv[2]
 entries = [json.loads(line) for line in open(src, encoding="utf-8")]
 kept_attachments = {"date"}
+# Thinking blocks go too: their base64 signature encodes the account's organization id.
+thinking = {"thinking", "redacted_thinking"}
+for e in entries:
+    content = (e.get("message") or {}).get("content")
+    if isinstance(content, list):
+        e["message"]["content"] = [c for c in content if not (isinstance(c, dict) and c.get("type") in thinking)]
 def kept(e):
     if e["type"] in ("user", "assistant"):
-        return True
+        return bool((e.get("message") or {}).get("content"))
     return e["type"] == "attachment" and e["attachment"].get("type") in kept_attachments
 parent = {e["uuid"]: e.get("parentUuid") for e in entries if "uuid" in e}
 keep = {e["uuid"] for e in entries if "uuid" in e and kept(e)}
