@@ -5,7 +5,7 @@ description: Comment hygiene audit - report which code comments in a file, a fol
 
 # audit
 
-A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report. Tickets and ADRs are created only after the user has seen their drafts: a request that already asks for them ("audit src/ and file the tickets") gets the report with the drafts and their offer, and a yes in a later turn creates them. The only other file a run writes is a repo run's report under `.scratch/`. Creating an ADR folder takes a yes of its own, to the question `Create docs/adr/ for these ADRs?`: **a yes to the ADRs never covers creating the folder.**
+A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report. Tickets and ADRs are created only after the user has seen their drafts, by [Tickets and ADRs](#tickets-and-adrs). The only other file a run writes is a repo run's report under `.scratch/`.
 
 ## Steps
 
@@ -19,7 +19,7 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 5. **Apply with `--fix`.** When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
 
-6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). They stay drafts this turn, whatever the request said. Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status: **ready** (the ADR folder exists) or **waiting** (it does not; only a yes to `Create docs/adr/ for these ADRs?` makes it ready).
+6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). They stay drafts this turn, whatever the request said. Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status, **ready** or **waiting**, by [The ADR folder](#the-adr-folder).
 
 7. **Write the report** in chat, in the format below. Done when every finding from step 4 is in it, under `### Applied` or its fix size.
 
@@ -59,7 +59,7 @@ Close with one line:
 - Nothing applied: `Report only: no files were changed.` When trivial findings exist, add the offer: `Reply "yes" to apply the N trivial fixes, or name the ones to apply.`
 - Fixes applied: `Applied N fixes in M files; nothing else was changed.`
 
-When ticket or ADR drafts remain, follow it with their offer: how many tickets would be filed where, how many ADRs would be written, and that a yes to them creates them. With no ADR folder, the offer ends with the question `Create docs/adr/ for these ADRs?`
+When ticket or ADR drafts remain, follow it with their offer: how many tickets would be filed where, how many ADRs would be written, and that a yes to them creates them. With a waiting ADR, the offer ends with the folder question from [The ADR folder](#the-adr-folder).
 
 ## Confirm and apply
 
@@ -74,7 +74,7 @@ How a finding goes from the report into the code. Two things start it: the user'
    | trivial | The edit below. Comment text only, so no typecheck or test run. |
    | local refactor | The refactor below, one finding at a time, each guarded by the repo's checks. |
    | ticket | Filed by [On confirmation](#on-confirmation). |
-   | ADR | Written by [On confirmation](#on-confirmation), into an ADR folder that already exists. With none, not applied: the report asks `Create docs/adr/ for these ADRs?` and nothing is created. |
+   | ADR | Written by [On confirmation](#on-confirmation) when **ready**. A **waiting** ADR is not applied, by [The ADR folder](#the-adr-folder). |
 
    `--fix` and a bare yes reach the trivial row only. Any other row is reached only by a reply or request that names that finding or its kind.
 
@@ -119,11 +119,15 @@ The repo's ADR folder: `docs/adr/`, or the folder of numbered decision records t
 
 Add a `## Considered Options` section only when the rejected option is worth remembering. The draft also shows the pointer that replaces the decision comment: one line in the file's comment syntax, e.g. `// Decision: docs/adr/0002-static-zone-rate-table.md`.
 
-With no ADR folder, draft the path as `docs/adr/0001-<slug>.md` and ask whether to create `docs/adr/`. Only a yes to that question creates the folder; a yes to writing ADRs does not answer it.
+### The ADR folder
+
+An ADR draft is **ready** when the ADR folder exists and **waiting** when it does not. A waiting draft takes the path `docs/adr/0001-<slug>.md`, and the report's offer ends with the question `Create docs/adr/ for these ADRs?`
+
+**A yes to the ADRs never covers creating the folder.** Where decisions live is the user's choice of repo structure, so only a yes to that question creates `docs/adr/`. Until that yes, a waiting ADR's folder, file and decision comment stay untouched: no `mkdir`, no file written, no edit. After it, create the folder; the drafts are then ready, and a yes to the ADRs, in the same reply or a later one, writes them.
 
 ### On confirmation
 
-- **ADR**: with no ADR folder, the ADR waits: the folder, the file and the comment stay untouched until the user answers yes to creating the folder. With the folder in place, write the file, then replace the decision comment with its pointer. Report the path.
+- **ADR**: a ready ADR: write the file, then replace the decision comment with its pointer. Report the path. A waiting ADR stays a draft, by [The ADR folder](#the-adr-folder).
 - **Ticket**: create it at its destination, then add its reference to the TODO (`TODO(#57): support express shipping`). Report the number or URL. When creation fails (no login, no network), keep the draft in the report with the error, and leave the TODO as it was.
 
 ## Repo runs
