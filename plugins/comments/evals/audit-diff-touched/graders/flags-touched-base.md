@@ -1,4 +1,4 @@
 ---
 type: regex
-pattern: 'one minus the rate'
+pattern: '(^|\n)\s*>[^\n]*one minus the rate'
 ---
