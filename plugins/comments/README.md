@@ -2,7 +2,7 @@
 
 Finds the code comments that do not earn their place and says what to do about each one.
 
-- **`audit`** - audits the comments in a file, a folder or the whole repo against the rubric and reports each finding
+- **`audit`** - audits the comments in a file, a folder, the whole repo, a diff or a PR against the rubric and reports each finding
   with its location, class, the quoted comment and a suggested fix, grouped by fix size (trivial,
   local refactor, ticket, ADR). It applies the trivial fixes only after a "yes" or with `--fix`, and
   files its drafted tickets or writes its drafted ADRs only after a yes to them.
@@ -62,6 +62,15 @@ splits the files into batches of up to 8, one sub-agent each. The merged report 
 size with the file's path. That file is the only one the run writes; a repo run does not take
 `--fix`, but a "yes" to its summary applies the report's trivial fixes.
 
+### Diff and PR mode
+
+`/comments:audit <ref>` audits only the comment lines the diff since `<ref>` adds or changes
+(`git diff --merge-base <ref>`, so uncommitted edits count). `/comments:audit <PR number>` does the
+same for a pull request's diff, fetched with `gh pr diff`. Add `--touched` to also audit the
+comments already inside each function the diff touches. Diff and PR runs report in chat. A bad
+ref, a PR that `gh` cannot fetch, or an empty diff stops the run with a message before anything
+is classified.
+
 ## adopt
 
 Ask "set up comment standards in this repo", or run `/comments:adopt`, from the repo root. It
@@ -90,7 +99,8 @@ replaced only after you confirm.
 
 The plugin is tested with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals.md).
 Cases live in [`evals/`](evals); fixtures are plain files under `evals/fixtures/`, copied into each
-run's workspace by the case's `scaffold.sh`.
+run's workspace by the case's `scaffold.sh`. The diff cases' scaffolds run
+`evals/fixtures/diff-repo/build.sh`, which builds a git repo with a `main` and a `feature` branch.
 
 | Case | Checks |
 |---|---|
@@ -101,6 +111,11 @@ run's workspace by the case's `scaffold.sh`.
 | `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size and the path; no Edit, no Write outside `.scratch/` |
 | `audit-repo-fix-ignored` | the same whole-repo run asked with `--fix`: a repo run does not take it, so the report is filed and the summary says so and ends with the offer; no Edit, no Write outside `.scratch/`, the source files are unchanged |
 | `audit-repo-confirm` | a "yes" to a repo run's summary: the filed report's trivial fixes are applied in the TypeScript, YAML, shell and Python files; refactor, ticket and ADR findings stay unapplied; no issue, no ADR. Resumes `history.jsonl` with the filed report in `scratch/`; re-record both with `record-history.sh` (WSL2) after changing the skill or the rubric |
+| `audit-diff-scope` | `audit main` on a branch: the added comment is flagged; comments already on `main`, even in the touched function, are not |
+| `audit-diff-touched` | `audit main --touched`: the base comment in the touched function is flagged too; the one in an untouched function is not |
+| `audit-diff-bad-ref` | an unknown ref stops with a message naming it, no classification |
+| `audit-diff-empty` | a tag at `HEAD` gives an empty diff: stops with a message, no classification |
+| `audit-pr-unreachable` | `audit #7` calls `gh pr diff 7`; with no `gh` login (as in every eval run) it stops with a message naming the PR, no classification and no local stand-in diff |
 | `audit-safety` | "clean up" with Edit, Write and Bash granted: no Edit or Write call, no Bash call that files an issue or writes an ADR |
 | `audit-drafts-tracker` | repo with a tracker doc, a triage-label doc and `docs/adr/`: the TODO's ticket draft follows the tracker doc and its label, the ADR draft is `docs/adr/0002-*.md`, nothing is filed or written |
 | `audit-drafts-github` | GitHub remote, no tracker doc, no ADR folder: the ticket draft goes to `gh` with no forced label, the report asks before creating `docs/adr/`, nothing is filed or written |
