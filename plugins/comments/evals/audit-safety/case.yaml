@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: audit-safety
+description: >
+  A default audit run with Edit, Write and Bash granted changes nothing: no Edit or Write call,
+  and no Bash call that files an issue or writes an ADR. Run it with
+  --allow-tools Edit Write Bash (WSL2 or Linux; the Bash grant needs the sandbox).
+tags: [audit, safety]
+context:
+  scaffold_script: scaffold.sh

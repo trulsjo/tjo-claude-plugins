@@ -10,6 +10,12 @@
       "source": "./plugins/explainer",
       "description": "Pick the clearest explanation format (prose, diagram, interactive page, video), and make narrated 3Blue1Brown-style explainer videos with automatic dependency setup.",
       "version": "0.4.0"
+    },
+    {
+      "name": "comments",
+      "source": "./plugins/comments",
+      "description": "Audit code comments against a 10-class rubric and report each finding with its class and a suggested fix, grouped by fix size.",
+      "version": "0.1.0"
     }
   ]
 }
