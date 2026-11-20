@@ -49,21 +49,21 @@ grep -q '"authMethod": *"claude.ai"' <<<"$auth" || die "not a claude.ai subscrip
 grep -q '"apiProvider": *"firstParty"' <<<"$auth" || die "API provider is not firstParty"
 
 plugins=$(claude plugin list 2>/dev/null) || die "claude plugin list failed"
-mp=$(grep -A3 'mattpocock-skills@' <<<"$plugins" || true)
-grep -q 'enabled' <<<"$mp" || die "mattpocock-skills is not installed and enabled in the user config"
-mp_version=$(sed -n 's/.*Version: *//p' <<<"$mp" | head -1)
+mattpocock_entry=$(grep -A3 'mattpocock-skills@' <<<"$plugins" || true)
+grep -q 'enabled' <<<"$mattpocock_entry" || die "mattpocock-skills is not installed and enabled in the user config"
+mattpocock_version=$(sed -n 's/.*Version: *//p' <<<"$mattpocock_entry" | head -1)
 
 script_dir=$(cd "$(dirname "$0")" && pwd)
 plugin_dir=$(cd "$script_dir/.." && pwd)
 plugin_version=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$plugin_dir/.claude-plugin/plugin.json")
-native() { if command -v cygpath >/dev/null; then cygpath -w "$1"; else echo "$1"; fi; }
+path_for_claude() { if command -v cygpath >/dev/null; then cygpath -w "$1"; else echo "$1"; fi; }
 
 work=$(mktemp -d)
 repo="$work/repo"
 cleanup() { if [ "$keep" = 0 ]; then rm -rf "$work"; else echo "kept: $work"; fi; }
 trap cleanup EXIT
 
-echo "comments $plugin_version, mattpocock-skills $mp_version, model $model, $(date +%Y-%m-%d)"
+echo "comments $plugin_version, mattpocock-skills $mattpocock_version, model $model, $(date +%Y-%m-%d)"
 
 mkdir -p "$repo/src" "$repo/docs/agents" "$repo/docs/specs"
 cd "$repo"
@@ -98,8 +98,8 @@ git commit -q -m "Cart line items and item count"
 
 if [ "$skip_adopt" = 0 ]; then
   echo "running comments:adopt ..."
-  claude -p "/comments:adopt" --model "$model" --plugin-dir "$(native "$plugin_dir")" \
-    --add-dir "$(native "$plugin_dir")" --permission-mode acceptEdits \
+  claude -p "/comments:adopt" --model "$model" --plugin-dir "$(path_for_claude "$plugin_dir")" \
+    --add-dir "$(path_for_claude "$plugin_dir")" --permission-mode acceptEdits \
     --allowedTools Read Glob Grep Skill Write Edit --max-budget-usd 1 \
     > "$work/adopt.txt" 2>&1 || die "adopt run failed; see $work/adopt.txt (use --keep)"
   [ -f docs/agents/comment-standards.md ] || die "adopt wrote no docs/agents/comment-standards.md"
