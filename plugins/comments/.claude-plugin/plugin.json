@@ -1,7 +1,7 @@
 {
   "name": "comments",
   "version": "0.1.0",
-  "description": "Audit code comments against one rubric of 10 classes: find the comments that narrate the code, prop up a bad name, record history or a decision, or have gone stale, and report each with its class and a suggested fix, grouped by fix size.",
+  "description": "Audit code comments against one rubric of 10 classes: find the comments that narrate the code, prop up a bad name, record history or a decision, or have gone stale, and report each with its class and a suggested fix, grouped by fix size. Adopt the rubric as a repo's coding standard for comments, so code reviews enforce it.",
   "author": {
     "name": "Truls Johnsen"
   },
