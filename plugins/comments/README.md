@@ -119,9 +119,8 @@ claude plugin eval . --runs 3 --threshold 0.8 --max-cost-usd 10 --ablation none 
   case's delta against no plugin.
 - `--model`, `--judge-model`: pinned so results compare across runs.
 - `--scaffold`: runs each case's `scaffold.sh`; without it the workspaces are empty.
-- `--allow-tools Edit Write Bash`: the safety, fix and confirm cases need them granted. Run
-  `audit-repo` on its own with `--allow-tools Edit Write`: with Bash granted, the model tries
-  `mkdir .scratch` in the read-only Bash sandbox, fails, and files the report outside `.scratch/`.
+- `--allow-tools Edit Write Bash`: the safety, fix and confirm cases need them granted. Every
+  case, `audit-repo` included, runs with all three granted.
 - `--no-publish`: keeps the report local. Results go to `evals/results/` (git-ignored).
 
 Add `--case <name> --runs 1` while working on one case. The first run in an untrusted folder asks to trust it; pass
