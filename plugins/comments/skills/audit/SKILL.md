@@ -27,7 +27,7 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 ## Report format
 
-The reply is the report alone: judge in your head, and name a class only on a finding.
+The reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding.
 
 Groups in this order, each a heading, empty groups left out: `### Trivial`, `### Local refactor`, `### Ticket`, `### ADR`. Each finding:
 

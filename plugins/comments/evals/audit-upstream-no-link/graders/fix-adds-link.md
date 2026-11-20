@@ -2,7 +2,7 @@
 type: llm
 ---
 
-The response is a comment audit of `src/http_client.py`, whose only comment says the requests library drops the Authorization header when a redirect changes the host, so the code follows redirects by hand.
+The response is a comment audit of `src/http_client.py`, whose only comment says urllib3 has a bug that leaks the pooled connection when a streamed response is closed early, so the code drains the body before closing.
 
 PASS only when all hold:
 1. The response reports exactly one finding, on that comment.
