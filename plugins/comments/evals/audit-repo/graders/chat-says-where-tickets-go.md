@@ -1,5 +1,5 @@
 ---
 type: regex
-pattern: 'tickets?\b[^\n]{0,120}(no tracker|tracker was found|would be filed|file the tickets)'
+pattern: 'ticket[^\n]{0,160}(tracker|would be filed|file the tickets)|tracker[^\n]{0,160}ticket'
 flags: i
 ---
