@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: adopt-newer-version
+description: >
+  Adopt over a doc stamped with an older version: everything above Local rules becomes the current
+  rubric with the current stamp, the Local rules section is kept as it was, and CLAUDE.md keeps one
+  entry. Needs --allow-tools Edit Write.
+tags: [adopt]
+context:
+  scaffold_script: scaffold.sh

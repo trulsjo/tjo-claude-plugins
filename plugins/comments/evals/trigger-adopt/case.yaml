@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: trigger-adopt
+description: A natural request to set up comment standards fires comments:adopt.
+tags: [trigger, adopt]
+context:
+  scaffold_script: scaffold.sh
