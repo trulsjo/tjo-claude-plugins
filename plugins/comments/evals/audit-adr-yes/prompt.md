@@ -1,6 +1,6 @@
 ---
 max_turns: 40
-allowed_tools: [Read, Glob, Grep, Skill]
+allowed_tools: [Read, Glob, Grep, Skill, AskUserQuestion]
 ---
 
-Audit the comments in src/. Yes, write the ADRs you draft and point the comments at them. Leave everything else in the report.
+Yes, write the ADR and point the comment at it.

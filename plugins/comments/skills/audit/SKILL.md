@@ -5,13 +5,13 @@ description: Comment hygiene audit - report which code comments in a file, a fol
 
 # audit
 
-A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, when the request carries `--fix`, or when the request itself says yes to the tickets or ADRs. Any other request, "clean up" included, ends at the report. The only other file a run writes is a repo run's report under `.scratch/`. Creating an ADR folder takes a yes of its own, to the question `Create docs/adr/ for these ADRs?`: **a yes to the ADRs never covers creating the folder.**
+A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report. Tickets and ADRs are created only after the user has seen their drafts: a request that already asks for them ("audit src/ and file the tickets") gets the report with the drafts and their offer, and a yes in a later turn creates them. The only other file a run writes is a repo run's report under `.scratch/`. Creating an ADR folder takes a yes of its own, to the question `Create docs/adr/ for these ADRs?`: **a yes to the ADRs never covers creating the folder.**
 
 ## Steps
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is what the user named: a pull request (a number, `#12` or a PR URL), a path that exists (a file or a folder, recursively), the whole repo when the user asks for it, or else a git ref. For a PR or a ref, follow [Diff scope](#diff-scope) in place of the rest of this step. With no target, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
+2. **Fix the scope.** The target is what the user named: a pull request (a number, `#12` or a PR URL), a path that exists (a file or a folder, recursively), the whole repo when the user asks for it, or else a git ref. For a PR or a ref, follow [Diff scope](#diff-scope) in place of the rest of this step. With no target, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 7.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
@@ -19,15 +19,13 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 5. **Apply with `--fix`.** When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
 
-6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status: **ready** (the ADR folder exists) or **waiting** (it does not; only a yes to `Create docs/adr/ for these ADRs?` makes it ready).
+6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). They stay drafts this turn, whatever the request said. Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status: **ready** (the ADR folder exists) or **waiting** (it does not; only a yes to `Create docs/adr/ for these ADRs?` makes it ready).
 
-7. **Act on a yes in the request.** When the request itself says yes to the tickets or the ADRs, create them now by [On confirmation](#on-confirmation); otherwise skip this step. A yes to the ADRs writes the **ready** ADRs only. A **waiting** ADR stays a draft whatever the request said, because a yes to the ADRs never covers creating the folder: where decisions live is the user's choice of repo structure, which a yes to the ADRs does not make. For it this turn runs no `mkdir` and writes no file, and the report asks `Create docs/adr/ for these ADRs?`. Done when each confirmed ticket is filed, each ready ADR written, and each waiting ADR untouched, or the step was skipped.
-
-8. **Write the report** in chat, in the format below. Done when every finding from step 4 is in it, under `### Applied` or its fix size, with what step 7 created.
+7. **Write the report** in chat, in the format below. Done when every finding from step 4 is in it, under `### Applied` or its fix size.
 
 ## Diff scope
 
-A ref or a PR scopes the audit to the **changed comment lines**: comments on the `+` lines of the diff, in files the rubric's scope covers. Context lines and `-` lines are outside the scope, even inside a hunk. Steps 3 to 8 then run as usual, judging only the comments in scope; the rest of each file is context for the verdict. A diff run reports in chat whatever its size: it is never a repo run.
+A ref or a PR scopes the audit to the **changed comment lines**: comments on the `+` lines of the diff, in files the rubric's scope covers. Context lines and `-` lines are outside the scope, even inside a hunk. Steps 3 to 7 then run as usual, judging only the comments in scope; the rest of each file is context for the verdict. A diff run reports in chat whatever its size: it is never a repo run.
 
 1. **Get the diff** from the one command for the target. When it fails, the audit ends there with that target's message, and nothing is classified: the user named this ref or PR, so no other base or local branch stands in for it. Done when you hold the diff text, or have stopped.
    - Ref: `git rev-parse --verify --quiet "<ref>^{commit}"` checks it; on failure the message is `<ref> is not a ref in this repo; nothing was audited.` Then `git diff --merge-base <ref>`: the change since the branch left the ref, uncommitted edits included.
@@ -65,7 +63,7 @@ When ticket or ADR drafts remain, follow it with their offer: how many tickets w
 
 ## Confirm and apply
 
-How a finding goes from the report into the code. Three things start it: the user's reply to the report's offer, `--fix` (step 5), or a request that says yes to the tickets or ADRs (step 7).
+How a finding goes from the report into the code. Two things start it: the user's reply to the report's offer, in a turn after the report, or `--fix` (step 5).
 
 1. **Pick the findings.** A bare yes ("yes", "apply them", "go ahead") covers every trivial finding in the last report. A reply that names findings, by location, quoted comment or kind ("file the tickets", "write the ADRs"), covers those. `--fix` covers every trivial finding of this run. Other replies are not a yes: answer them and change nothing. Done when you have the list of findings to apply, each with its fix size.
 
@@ -93,11 +91,11 @@ How a finding goes from the report into the code. Three things start it: the use
 
    Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed, plus the patch and its references for each kept refactor.
 
-3. **Report.** Under `--fix` or a yes in the request, return to step 8. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
+3. **Report.** Under `--fix`, return to step 7. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
 
 ## Tickets and ADRs
 
-Ticket and ADR findings are **drafts** until the user confirms them by name or kind. A yes covers only what it names: a yes to the ADRs files no ticket.
+Ticket and ADR findings are **drafts** until the user confirms them by name or kind, in a reply to the report that showed them. A yes the request already carried ("audit src/ and write the ADRs") comes before the user has seen any draft, so it confirms nothing: that turn files no ticket and writes no ADR, and the report shows the drafts with their offer. A yes covers only what it names: a yes to the ADRs files no ticket.
 
 ### Where a ticket goes
 
