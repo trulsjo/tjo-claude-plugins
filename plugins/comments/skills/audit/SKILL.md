@@ -132,7 +132,7 @@ An ADR draft is **ready** when the ADR folder exists and **waiting** when it doe
 
 ## Repo runs
 
-A repo run splits the judging across sub-agents and files the report instead of printing it. It does not take `--fix`: it ends at the summary, and a yes to the summary's offer applies the filed report's trivial findings by **Confirm and apply**.
+A repo run splits the judging across sub-agents and files the report instead of printing it. It does not take `--fix`: it ends at the summary, and a yes to the summary's offer applies the filed report's findings it names (a bare yes: the trivial ones) by **Confirm and apply**.
 
 R1. **Fan out.** Split the file list into batches of up to 8 files, keeping a folder's files together. Start one sub-agent per batch, all in one message. Give each: the rubric path `${CLAUDE_PLUGIN_ROOT}/rubric.md`, its batch's file paths, the repo rules from step 3, and this task: read the rubric and each file in full, give every comment a verdict as in step 4, change no files, and return only the findings, each in the finding format above, or `No findings.` Done when every batch has returned.
 
@@ -147,4 +147,4 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    Report only: no source files were changed.
    ```
 
-   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When the request carried `--fix`, add one line before the offer: `A repo run does not take --fix, so nothing was applied.`
+   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and the folder question for a waiting ADR. When the request carried `--fix`, add one line before the offers: `A repo run does not take --fix, so nothing was applied.`

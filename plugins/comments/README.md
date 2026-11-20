@@ -60,7 +60,8 @@ A whole-repo audit ("audit the comments in the whole repo"), or a path with more
 splits the files into batches of up to 8, one sub-agent each. The merged report goes to
 `.scratch/comments-audit-<YYYY-MM-DD>.md` in the repo, and chat shows the counts by class and fix
 size with the file's path. That file is the only one the run writes; a repo run does not take
-`--fix`, but a "yes" to its summary applies the report's trivial fixes.
+`--fix`, but a "yes" to its summary applies the report's trivial fixes. The summary also offers
+the report's ticket and ADR drafts, which a reply naming them creates.
 
 ### Diff and PR mode
 
@@ -114,7 +115,7 @@ run's workspace by the case's `scaffold.sh`. The diff cases' scaffolds run
 | `audit-markdown-ignored` | Markdown files in the audited path: `No findings.` and no `.md` location |
 | `audit-repo-standard-wins` | the repo's standards require a docstring on every function: no class 10 findings |
 | `audit-inline-what` | an inline comment holding the function's *what* is moved into its docstring; a public function with no docstring is not flagged |
-| `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size and the path; no Edit, no Write outside `.scratch/` |
+| `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size, the path, and the ticket and ADR drafts' offer (no tracker found, the `docs/adr/` question); no Edit, no Write outside `.scratch/` |
 | `audit-repo-fix-ignored` | the same whole-repo run asked with `--fix`: a repo run does not take it, so the report is filed and the summary says so and ends with the offer; no Edit, no Write outside `.scratch/`, the source files are unchanged |
 | `audit-repo-confirm` | a "yes" to a repo run's summary: the filed report's trivial fixes are applied in the TypeScript, YAML, shell and Python files; refactor, ticket and ADR findings stay unapplied; no issue, no ADR. Resumes `history.jsonl` with the filed report in `scratch/`; re-record both with `record-history.sh` (WSL2) after changing the skill or the rubric |
 | `audit-diff-scope` | `audit main` on a branch: the added comment is flagged; comments already on `main`, even in the touched function, are not |
