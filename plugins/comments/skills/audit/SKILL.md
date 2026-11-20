@@ -1,17 +1,17 @@
 ---
 name: audit
-description: Comment hygiene audit - report which code comments in a file or folder to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
+description: Comment hygiene audit - report which code comments in a file, a folder or the whole repo to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
 ---
 
 # audit
 
-A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report.
+A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report. The only other file a run writes is a repo run's report under `.scratch/`.
 
 ## Steps
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively); with no path, ask for one. List the files in it that the rubric's scope covers, skipping dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`). Done when you have the file list.
+2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively), or the whole repo when the user asks for it; with neither, ask for a path. List the files in it that the rubric's scope covers, skipping dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`). Done when you have the file list. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 6.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
@@ -69,3 +69,22 @@ How a finding goes from the report into the code. Two things start it: the user'
    Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed.
 
 3. **Report.** Under `--fix`, return to step 6. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
+
+## Repo runs
+
+A repo run splits the judging across sub-agents and files the report instead of printing it. It does not take `--fix`: it ends at the summary, and a yes to the summary's offer applies the filed report's trivial findings by **Confirm and apply**.
+
+R1. **Fan out.** Split the file list into batches of up to 8 files, keeping a folder's files together. Start one sub-agent per batch, all in one message. Give each: the rubric path `${CLAUDE_PLUGIN_ROOT}/rubric.md`, its batch's file paths, the repo rules from step 3, and this task: read the rubric and each file in full, give every comment a verdict as in step 4, change no files, and return only the findings, each in the finding format above, or `No findings.` Done when every batch has returned.
+
+R2. **File the report.** Merge the batches' findings into one report in the format above; its opening line counts the whole run. Write it to `.scratch/comments-audit-<YYYY-MM-DD>.md` under the repo root, with today's date; when that file exists, add `-2`, `-3` and so on before `.md`. Done when the file holds every finding from every batch.
+
+R3. **Summarise in chat**, in this shape, with sizes and classes that have no findings left out; the findings themselves stay in the file:
+
+   ```
+   Report: `.scratch/comments-audit-2026-11-20.md` (12 files read, 15 findings)
+   By fix size: trivial 10, local refactor 1, ticket 3, ADR 1
+   By class: class 1: 2, class 2: 1, class 5: 1, class 7: 2, ...
+   Report only: no source files were changed.
+   ```
+
+   When trivial findings exist, end with the offer line from the report format.
