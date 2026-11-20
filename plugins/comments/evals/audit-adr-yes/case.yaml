@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: audit-adr-yes
+description: >
+  An audit whose request says yes to writing the ADRs, in a repo with an ADR folder, writes the
+  decision comment's ADR as docs/adr/0002-*.md and shrinks the comment to a pointer to it, and
+  files no ticket. Run it with --allow-tools Edit Write Bash.
+tags: [audit, adr]
+context:
+  scaffold_script: scaffold.sh
