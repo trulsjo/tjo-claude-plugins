@@ -32,7 +32,7 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
 ```
 
 - **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add.
-- A local refactor carries the patch as a diff block. A ticket carries a draft (title and two-line body). An ADR carries a draft (title and the decision in one to three sentences) and the one-line pointer that replaces the comment.
+- A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. A ticket carries a draft (title and two-line body). An ADR carries a draft (title and the decision in one to three sentences) and the one-line pointer that replaces the comment.
 
 Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line and `No findings.`
 
@@ -54,7 +54,7 @@ How a finding goes from the report into the code. Two things start it: the user'
    | Fix size | How it is applied |
    |---|---|
    | trivial | The edit below. Comment text only, so no typecheck or test run. |
-   | local refactor | Not applied: stays in the report. |
+   | local refactor | The refactor below, one finding at a time, each guarded by the repo's checks. |
    | ticket | Not applied: stays in the report. |
    | ADR | Not applied: stays in the report. |
 
@@ -66,7 +66,12 @@ How a finding goes from the report into the code. Two things start it: the user'
    - **Rewrite** (class 6 fix, class 10 rewrite): replace the comment text with the fix the report gave.
    - A fix that needs a fact the code does not hold, such as the upstream link for class 4, is not applied: it stays in the report with `Not applied: needs <the fact>`.
 
-   Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed.
+   The local refactor:
+   - **Find the checks**, once, before the first refactor: the repo's typecheck and test commands, where the repo declares them (`package.json` scripts, `Makefile`, `pyproject.toml`, `tox.ini`, CI workflows, README, CONTRIBUTING). Run them. When they already fail, no refactor is applied: each stays in the report with `Not applied: the checks fail before any change (<command>)`. When there are none, refactors are applied unchecked and each `Applied:` line ends `unchecked: no typecheck or tests found`.
+   - **Apply the patch**: re-read the file, make the report's patch with Edit, update every reference to the renamed or extracted name that a search of the repo finds, and remove the comment. Keep the original text of every line you change.
+   - **Run the checks.** Green: the refactor stays, and its `Applied:` line names the commands that passed. Red: Edit every changed line back to its original text, re-read each file to confirm it matches its original, and leave the finding in its group with `Not applied: <command> failed after the change (<first failing test or error>); reverted.` The checks are the guard: a red check is answered by reverting, never by editing tests or other code to make it pass.
+
+   Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed, plus the patch and its references for each kept refactor.
 
 3. **Report.** Under `--fix`, return to step 6. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
 
