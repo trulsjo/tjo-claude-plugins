@@ -131,4 +131,4 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    Report only: no source files were changed.
    ```
 
-   When trivial findings exist, end with the offer line from the report format.
+   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When the request carried `--fix`, add one line before the offer: `A repo run does not take --fix, so nothing was applied.`
