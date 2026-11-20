@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: audit-refactor-green
+description: >
+  Resumes an audit of shop/pricing.py that ended at its report (history.jsonl, made by
+  record-history.sh), and names the local refactor: rename r so the comment explaining it can go.
+  The rename is applied, the comment removed, the fixture's tests run (make test) and stay green,
+  so the change is kept and listed under Applied. Run it with --allow-tools Edit Write Bash
+  (WSL2 or Linux).
+tags: [audit, fix, refactor]
+context:
+  scaffold_script: scaffold.sh
+  history_file: history.jsonl

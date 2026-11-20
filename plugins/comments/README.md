@@ -33,6 +33,12 @@ the function's API doc). Reply "yes" to apply them all, or name the ones to appl
 `/comments:audit <path> --fix` to apply them without the offer. Neither applies local refactors,
 files tickets or writes ADRs: those stay in the report. Applied fixes are listed under `Applied`.
 
+A local refactor (a rename or extract that makes a comment unnecessary) comes with its patch, and
+is applied only when you name it in your reply. The repo's typecheck and tests are run before the
+first refactor and after each one, when the repo declares them (`package.json` scripts, `Makefile`,
+`pyproject.toml`, `tox.ini`, CI workflows, README, CONTRIBUTING). A refactor that turns them red is
+reverted, and the report says which check failed.
+
 A whole-repo audit ("audit the comments in the whole repo"), or a path with more than 20 files,
 splits the files into batches of up to 8, one sub-agent each. The merged report goes to
 `.scratch/comments-audit-<YYYY-MM-DD>.md` in the repo, and chat shows the counts by class and fix
@@ -79,6 +85,8 @@ run's workspace by the case's `scaffold.sh`.
 | `audit-safety` | "clean up" with Edit, Write and Bash granted: no Edit or Write call, no Bash call that files an issue or writes an ADR |
 | `audit-fix` | `--fix`: the narrating and commented-out comments are deleted and a *what* comment moves into the API doc, without a question; refactor, ticket and ADR findings stay unapplied in the report; no issue, no ADR |
 | `audit-confirm` | the same checks after a "yes" to the report's offer. Resumes `history.jsonl`; re-record it with `record-history.sh` (WSL2) after changing the skill or the rubric |
+| `audit-refactor-green` | Python fixture with `make test`: naming the local refactor in the reply applies the rename and removes the comment, the tests run and pass, the change is listed under `Applied`, the tests are not edited. Resumes `history.jsonl`; re-record it with `record-history.sh` after changing the skill or the rubric |
+| `audit-refactor-revert` | a rename that a dynamic lookup (`getattr(handlers, "on_" + type)`) depends on: the tests fail after it, the file is reverted, the tests and the caller are not edited, the report says `Not applied` with the failing check. Resumes `history.jsonl` like the case above |
 | `trigger-adopt` | "set up comment standards in this repo" fires `adopt` |
 | `adopt-fresh` | first adopt: the doc has the stamp, the whole rubric and an empty `## Local rules`; CLAUDE.md gains the heading and one entry and keeps its old content |
 | `adopt-existing-heading` | the entry goes under CLAUDE.md's existing coding-standards heading; no second heading |
