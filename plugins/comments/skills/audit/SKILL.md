@@ -1,17 +1,17 @@
 ---
 name: audit
-description: Comment hygiene audit - report which code comments in a file or folder to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
+description: Comment hygiene audit - report which code comments in a file, a folder or the whole repo to delete, move or replace with code, by the comment rubric, grouped by fix size. Use only when the user's request names comments - auditing or cleaning up comments, comment noise, stale comments, untracked TODOs. Code reviews, bug hunts and refactoring requests that do not mention comments are out of scope.
 ---
 
 # audit
 
-A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, when the request carries `--fix`, or when the request itself says yes to the tickets or ADRs. Any other request, "clean up" included, ends at the report. Creating an ADR folder takes a yes of its own, to the question `Create docs/adr/ for these ADRs?`: **a yes to the ADRs never covers creating the folder.**
+A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, when the request carries `--fix`, or when the request itself says yes to the tickets or ADRs. Any other request, "clean up" included, ends at the report. The only other file a run writes is a repo run's report under `.scratch/`. Creating an ADR folder takes a yes of its own, to the question `Create docs/adr/ for these ADRs?`: **a yes to the ADRs never covers creating the folder.**
 
 ## Steps
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively); with no path, ask for one. List the files in it that the rubric's scope covers, skipping dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`). Done when you have the file list.
+2. **Fix the scope.** The target is the path the user named (a file or a folder, recursively), or the whole repo when the user asks for it; with neither, ask for a path. List the files in it that the rubric's scope covers, skipping dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`). Done when you have the file list. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 8.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
@@ -36,7 +36,7 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
 ```
 
 - **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add.
-- A local refactor carries the patch as a diff block. Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
+- A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
 
 Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line and `No findings.`
 
@@ -60,7 +60,7 @@ How a finding goes from the report into the code. Three things start it: the use
    | Fix size | How it is applied |
    |---|---|
    | trivial | The edit below. Comment text only, so no typecheck or test run. |
-   | local refactor | Not applied: stays in the report. |
+   | local refactor | The refactor below, one finding at a time, each guarded by the repo's checks. |
    | ticket | Filed by [On confirmation](#on-confirmation). |
    | ADR | Written by [On confirmation](#on-confirmation), into an ADR folder that already exists. With none, not applied: the report asks `Create docs/adr/ for these ADRs?` and nothing is created. |
 
@@ -72,7 +72,12 @@ How a finding goes from the report into the code. Three things start it: the use
    - **Rewrite** (class 6 fix, class 10 rewrite): replace the comment text with the fix the report gave.
    - A fix that needs a fact the code does not hold, such as the upstream link for class 4, is not applied: it stays in the report with `Not applied: needs <the fact>`.
 
-   Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed.
+   The local refactor:
+   - **Find the checks**, once, before the first refactor: the repo's typecheck and test commands, where the repo declares them (`package.json` scripts, `Makefile`, `pyproject.toml`, `tox.ini`, CI workflows, README, CONTRIBUTING). Run them. When they already fail, no refactor is applied: each stays in the report with `Not applied: the checks fail before any change (<command>)`. When there are none, refactors are applied unchecked and each `Applied:` line ends `unchecked: no typecheck or tests found`.
+   - **Apply the patch**: re-read the file, make the report's patch with Edit, update every reference to the renamed or extracted name that a search of the repo finds, and remove the comment. Keep the original text of every line you change.
+   - **Run the checks.** Green: the refactor stays, and its `Applied:` line names the commands that passed. Red: Edit every changed line back to its original text, re-read each file to confirm it matches its original, and leave the finding in its group with `Not applied: <command> failed after the change (<first failing test or error>); reverted.` The checks are the guard: a red check is answered by reverting, never by editing tests or other code to make it pass.
+
+   Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed, plus the patch and its references for each kept refactor.
 
 3. **Report.** Under `--fix` or a yes in the request, return to step 8. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
 
@@ -108,3 +113,22 @@ With no ADR folder, draft the path as `docs/adr/0001-<slug>.md` and ask whether 
 
 - **ADR**: with no ADR folder, the ADR waits: the folder, the file and the comment stay untouched until the user answers yes to creating the folder. With the folder in place, write the file, then replace the decision comment with its pointer. Report the path.
 - **Ticket**: create it at its destination, then add its reference to the TODO (`TODO(#57): support express shipping`). Report the number or URL. When creation fails (no login, no network), keep the draft in the report with the error, and leave the TODO as it was.
+
+## Repo runs
+
+A repo run splits the judging across sub-agents and files the report instead of printing it. It does not take `--fix`: it ends at the summary, and a yes to the summary's offer applies the filed report's trivial findings by **Confirm and apply**.
+
+R1. **Fan out.** Split the file list into batches of up to 8 files, keeping a folder's files together. Start one sub-agent per batch, all in one message. Give each: the rubric path `${CLAUDE_PLUGIN_ROOT}/rubric.md`, its batch's file paths, the repo rules from step 3, and this task: read the rubric and each file in full, give every comment a verdict as in step 4, change no files, and return only the findings, each in the finding format above, or `No findings.` Done when every batch has returned.
+
+R2. **File the report.** Merge the batches' findings into one report in the format above; its opening line counts the whole run. Place its ticket and ADR drafts as step 6 does. Write it to `.scratch/comments-audit-<YYYY-MM-DD>.md` under the repo root, with today's date; when that file exists, add `-2`, `-3` and so on before `.md`. Done when the file holds every finding from every batch.
+
+R3. **Summarise in chat**, in this shape, with sizes and classes that have no findings left out; the findings themselves stay in the file:
+
+   ```
+   Report: `.scratch/comments-audit-2026-11-20.md` (12 files read, 15 findings)
+   By fix size: trivial 10, local refactor 1, ticket 3, ADR 1
+   By class: class 1: 2, class 2: 1, class 5: 1, class 7: 2, ...
+   Report only: no source files were changed.
+   ```
+
+   When trivial findings exist, end with the offer line from the report format.

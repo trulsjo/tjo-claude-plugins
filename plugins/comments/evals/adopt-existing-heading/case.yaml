@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: adopt-existing-heading
+description: >
+  CLAUDE.md already has a "Coding Standards" heading followed by another section: the entry goes
+  under the existing heading, no second heading is added, and the rest of CLAUDE.md is kept.
+  Needs --allow-tools Edit Write.
+tags: [adopt]
+context:
+  scaffold_script: scaffold.sh
