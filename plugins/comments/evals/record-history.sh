@@ -35,12 +35,12 @@ ENABLE_CLAUDEAI_MCP_SERVERS=false claude -p "$prompt" --session-id "$session" \
 if [ "$keep_scratch" = 1 ]; then
   reports=("$work"/.scratch/*.md)
   [ -f "${reports[0]}" ] || { echo "the run filed no report under .scratch/" >&2; exit 1; }
-  rm -rf "$case_dir/scratch"
-  mkdir -p "$case_dir/scratch"
-  cp "${reports[@]}" "$case_dir/scratch/"
 fi
 transcript="$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects" -name "$session.jsonl" | head -n 1)"
-python3 - "$transcript" "$case_dir/history.jsonl" "$work" "$@" <<'PY'
+[ -f "$transcript" ] || { echo "no transcript for session $session; nothing written" >&2; exit 1; }
+# The history and the reports are a pair: both are written to $work first, and the case's copies
+# are replaced only once the filter has accepted the run.
+python3 - "$transcript" "$work/history.jsonl.new" "$work" "$@" <<'PY'
 import json, sys
 src, dst, work, tools = sys.argv[1], sys.argv[2], sys.argv[3], set(sys.argv[4:])
 entries = [json.loads(line) for line in open(src, encoding="utf-8")]
@@ -76,4 +76,10 @@ with open(dst, "w", encoding="utf-8") as out:
             e["parentUuid"] = kept_parent(e.get("parentUuid"))
             out.write(json.dumps(e, ensure_ascii=False) + "\n")
 PY
+if [ "$keep_scratch" = 1 ]; then
+  rm -rf "$case_dir/scratch"
+  mkdir -p "$case_dir/scratch"
+  cp "${reports[@]}" "$case_dir/scratch/"
+fi
+mv "$work/history.jsonl.new" "$case_dir/history.jsonl"
 echo "wrote $case_dir/history.jsonl"
