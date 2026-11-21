@@ -5,19 +5,25 @@ description: Comment hygiene audit - report which code comments in a file, a fol
 
 # audit
 
-A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix`. Any other request, "clean up" included, ends at the report. Tickets and ADRs are created only after the user has seen their drafts, by [Tickets and ADRs](#tickets-and-adrs). The only other file a run writes is a repo run's report under `.scratch/`.
+A **report-first** audit. Every comment in scope is judged against the rubric, and each one that does not earn its place becomes a finding with a class and a fix. Files change, and tickets are filed, only through **Confirm and apply** below: after the user answers the report's offer with a yes, or when the request carries `--fix` on a diff run or after step 2 wrote `Run type: path run` (on a repo run `--fix` is not taken and nothing is edited this turn). Any other request, "clean up" included, ends at the report. Tickets and ADRs are created only after the user has seen their drafts, by [Tickets and ADRs](#tickets-and-adrs). The only other file a run writes is a repo run's report under `.scratch/`.
 
 ## Steps
 
 1. **Load the rubric.** Read `${CLAUDE_PLUGIN_ROOT}/rubric.md`. It holds the classes, the keep list, the fix sizes and the scope rules; it is the only source of the rules. Done when you have read the whole file.
 
-2. **Fix the scope.** The target is what the user named: a pull request (a number, `#12` or a PR URL), a path that exists (a file or a folder, recursively), the whole repo when the user asks for it, or else a git ref. For a PR or a ref, follow [Diff scope](#diff-scope) in place of the rest of this step. With no target, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Done when every file under the path is either on your list or dropped by one of these rules. A whole-repo target, or a list of more than 20 files, makes this a **repo run**: after step 3, follow [Repo runs](#repo-runs) in place of steps 4 to 7.
+2. **Fix the scope.** The target is what the user named: a pull request (a number, `#12` or a PR URL), a path that exists (a file or a folder, recursively), the whole repo when the user asks for it, or else a git ref. For a PR or a ref, follow [Diff scope](#diff-scope) in place of the rest of this step. With no target, ask for a path. List every file in it with the Glob tool (`**/*`), not a shell command or an extension list of your own. Drop only dependency and build output (`node_modules`, `vendor`, `dist`, `build`, `.git`), Markdown and other prose documents, and binary files; everything else stays, because the rubric's scope covers shell scripts and config files (`.sh`, `.yaml`, `.toml`, `.ini` and similar) as well as source code. Then decide the run type and write it, before you read any file in the list. Take the target from the user's own message, not only from the skill's arguments, which may have dropped it. It is a **path run** only when the message names a path or file that exists and the list holds 20 files or fewer. Everything else is a **repo run**: "the whole repo", "the codebase", "everything" or the repo root, however few files the repo holds, or a list of more than 20 files. Write exactly one of these lines as your first words to the user, quoting the target as the message names it:
+   - `Run type: repo run (target: "<the user's words>", N files). The report goes to .scratch/; --fix is not taken.`
+   - `Run type: path run (target: "<the path the user named>", N files).`
+
+   A path-run line with no path quoted from the message is wrong: write the repo-run line instead.
+
+   A repo run follows [Repo runs](#repo-runs) after step 3, in place of steps 4 to 7, whatever the repo's size: do not judge a small repo yourself instead of fanning out. Done when every file under the path is either on your list or dropped by one of these rules, and the run-type line is written.
 
 3. **Read the repo's standards.** Search the repo for files that document how code should be written (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, `CLAUDE.md`, `AGENTS.md`, style guides under `docs/`). Note every rule that speaks about comments or API docs. Done when you can name each such rule, or know there are none.
 
 4. **Judge every comment.** Read each file in full. For each comment, decide: on the keep list, or one class from the rubric. A comment that a repo rule from step 3 requires or allows is kept: the repo wins. Done when every comment in every listed file has a verdict.
 
-5. **Apply with `--fix`.** When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
+5. **Apply with `--fix`.** Only after a `Run type: path run` line, or on a diff run. A repo run never reaches this step, so a whole-repo request with `--fix` edits nothing. When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
 
 6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). They stay drafts this turn, whatever the request said. Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status, **ready** or **waiting**, by [The ADR folder](#the-adr-folder).
 
@@ -37,7 +43,7 @@ Locations in the report are line numbers in the new version of the file. For a P
 
 ## Report format
 
-The reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding.
+After the run-type line from step 2, the reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding.
 
 Groups in this order, each a heading, empty groups left out: `### Trivial`, `### Local refactor`, `### Ticket`, `### ADR`. Each finding:
 
@@ -80,7 +86,7 @@ How a finding goes from the report into the code. Two things start it: the user'
 
    The trivial edit: re-read the file, then make one Edit per finding.
    - **Delete**: remove the comment's lines whole, leaving the code and its indentation as they were.
-   - **Move into the API doc**: put the comment's *what* into the function's doc comment, keeping every fact it states (each input it names, each limit, each error) and rewording only to fit the convention, in the file's doc-comment convention (JSDoc above a TypeScript function, a docstring in Python); create the doc comment when there is none. Then delete the inline comment.
+   - **Move into the API doc**: copy the comment's words into the function's doc comment word for word, changing only the comment markers (`//` becomes `/** ... */`, `#` becomes a docstring): do not shorten, reword or summarise them, so every fact it states (each input it names, each limit, each error) arrives intact. Use the file's doc-comment convention (JSDoc above a TypeScript function, a docstring in Python); create the doc comment when there is none. Then delete the inline comment.
    - **Rewrite** (class 6 fix, class 10 rewrite): replace the comment text with the fix the report gave.
    - A fix that needs a fact the code does not hold, such as the upstream link for class 4, is not applied: it stays in the report with `Not applied: needs <the fact>`.
 
@@ -147,4 +153,4 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    Report only: no source files were changed.
    ```
 
-   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and, for a waiting ADR, the folder question word for word as the last line: `Create docs/adr/ for these ADRs?` When the request carried `--fix`, add one line before the offers: `A repo run does not take --fix, so nothing was applied.`
+   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and, for a waiting ADR, the folder question word for word as the last line: `Create docs/adr/ for these ADRs?` When the request carried `--fix`, add one line before the offers: `A repo run does not take --fix, so nothing was applied.` Keep it even though the run-type line said so at the start: the summary is what the user reads when the run ends.
