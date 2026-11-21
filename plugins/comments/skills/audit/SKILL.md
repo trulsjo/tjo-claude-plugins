@@ -45,7 +45,7 @@ Edits go to the working tree, so a PR run takes `--fix` only when the checkout i
 
 ## Report format
 
-After the run-type line from step 2, the reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding.
+After the run-type line from step 2, the reply is the report alone (on a repo run, the summary alone), and the report lists findings only: verdicts on kept comments stay silent, and a class is named only on a finding. One exception: when a repo rule from step 3 keeps comments the rubric alone would flag, a `Kept by repo rules` line follows the findings (or `No findings.`), then a bullet per such comment with its location and the rule's file, as ``- `lib/orders.rb:14` - kept by the rule in CONTRIBUTING.md``. Those bullets name no class; they are not findings and do not count in the opening line.
 
 Groups in this order, each a heading, empty groups left out: `### Trivial`, `### Local refactor`, `### Ticket`, `### ADR`. Each finding:
 
@@ -58,7 +58,16 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
 - **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add.
 - A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
 
-Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line and `No findings.`
+Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line, then `No findings.` on a line of its own, then the kept list if there is one:
+
+```
+`lib/`, 3 files read, 0 findings.
+
+No findings.
+
+Kept by repo rules
+- `lib/orders.rb:14` - kept by the rule in CONTRIBUTING.md
+```
 
 When fixes were applied, an `### Applied` group comes first. Its entries keep the finding format with `Applied:` in place of `Fix:`, naming the change made: for an ADR the file written, for a ticket its number or URL. Findings not applied stay in their fix-size group; one that could not be applied says why on a `Not applied:` line.
 
