@@ -125,6 +125,8 @@ The repo's ADR folder: `docs/adr/`, or the folder of numbered decision records t
 {1-3 sentences: the context, what was decided, and why.}
 ```
 
+The ADR keeps every fact of the decision comment it replaces: each option it names and each reason it gives, so the pointer loses nothing.
+
 Add a `## Considered Options` section only when the rejected option is worth remembering. The draft also shows the pointer that replaces the decision comment: one line in the file's comment syntax, e.g. `// Decision: docs/adr/0002-static-zone-rate-table.md`.
 
 ### The ADR folder
