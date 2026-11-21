@@ -23,7 +23,7 @@ A **report-first** audit. Every comment in scope is judged against the rubric, a
 
 4. **Judge every comment.** Read each file in full. For each comment, decide: on the keep list, or one class from the rubric. A comment that a repo rule from step 3 requires or allows is kept: the repo wins. When a rule requires doc comments, it keeps each such doc comment whole, its summary line included: do not split it into a required part that stays and a class-10 part that goes. Done when every comment in every listed file has a verdict.
 
-5. **Apply with `--fix`.** Only after a `Run type: path run` line, or on a diff run. A repo run never reaches this step, so a whole-repo request with `--fix` edits nothing. When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
+5. **Apply with `--fix`.** Only after a `Run type: path run` line, or on a diff run whose files are the working tree's (see [Diff scope](#diff-scope) for a PR). A repo run never reaches this step, so a whole-repo request with `--fix` edits nothing. When the request carries `--fix`, apply the trivial findings now, by **Confirm and apply**, without asking. Without `--fix`, skip this step. Done when every trivial finding is applied or marked why not, or the step was skipped.
 
 6. **Place the drafts.** When step 4 found ticket or ADR findings, work out where each would go, by [Tickets and ADRs](#tickets-and-adrs). They stay drafts this turn, whatever the request said. Done when every ticket draft names its tracker and labels (or says it stays in the report), and every ADR draft has its file path and one status, **ready** or **waiting**, by [The ADR folder](#the-adr-folder).
 
@@ -40,6 +40,8 @@ A ref or a PR scopes the audit to the **changed comment lines**: comments on the
 3. **Widen with `--touched`** when the user passes it or asks for touched code: the scope also takes every comment already inside a **touched function**: the innermost function or method that holds a `+` or `-` line, its doc comment included. Functions the diff does not touch stay outside. Done when you can name each touched function.
 
 Locations in the report are line numbers in the new version of the file. For a PR, read that version at the PR's head (`git fetch origin pull/<number>/head`, then `git show FETCH_HEAD:<path>`); when that fetch fails, judge from the diff hunks, which carry their own line numbers.
+
+Edits go to the working tree, so a PR run takes `--fix` only when the checkout is the PR's head: `git rev-parse HEAD` equals `git rev-parse FETCH_HEAD` after that fetch. Otherwise, or when the fetch failed, step 5 is skipped, and the report's closing line is followed by `--fix was not taken: the checkout is not PR #<number>'s head.` A yes to the report is refused the same way. A ref run's files are the working tree's, so it takes `--fix` as a path run does.
 
 ## Report format
 
