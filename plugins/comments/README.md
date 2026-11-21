@@ -116,7 +116,8 @@ is public).
 | `audit-keep-*` | one case per keep-list item (linked upstream workaround, constraint-why, contract API doc, license header, tool directives, ticketed TODO), across Python, C++, shell and YAML: `No findings.` |
 | `audit-upstream-no-link` | an upstream workaround with no link or version: one class 4 finding whose fix adds the link |
 | `audit-markdown-ignored` | Markdown files in the audited path: `No findings.` and no `.md` location |
-| `audit-repo-standard-wins` | the repo's standards require a docstring on every function: no class 10 findings |
+| `audit-repo-standard-wins` | the repo's standards require a docstring on every function: no class 10 findings, `No findings.` |
+| `audit-repo-standard-kept-list` | the same standard, with a narrating comment and commented-out code in the file: both findings, then the two docstrings under `Kept by repo rules`, no class on them |
 | `audit-inline-what` | an inline comment holding the function's *what* is moved into its docstring; a public function with no docstring is not flagged |
 | `audit-repo` | whole-repo run on a multi-folder fixture (TypeScript, shell, YAML, Python): merged report written to `.scratch/comments-audit-<date>.md` in the path-run format with findings from every folder, none from the clean folder or Markdown; chat shows counts by class and fix size, the path, and the ticket and ADR drafts' offer (no tracker found, the `docs/adr/` question); no Edit, no Write outside `.scratch/` |
 | `audit-repo-fix-ignored` | the same whole-repo run asked with `--fix`: a repo run does not take it, so the report is filed and the summary says so and ends with the offer; no Edit, no Write outside `.scratch/`, the source files are unchanged |
