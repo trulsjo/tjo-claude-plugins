@@ -188,11 +188,14 @@ config:
 2. runs `/comments:adopt` with this folder as `--plugin-dir` and commits the result on `main`,
 3. adds a narrating (class 1) comment on a branch,
 4. runs `/mattpocock-skills:code-review main` through `claude -p`,
-5. passes when the `## Standards` section cites `comment-standards.md` for the planted comment.
+5. passes when one finding under `## Standards` (a paragraph or list item, before the next
+   heading) both cites `comment-standards.md` and names the planted comment ("loop over",
+   "narrat" or class 1), and does not say there is no violation.
 
 ```
 plugins/comments/integration/code-review.sh            # exit 0 pass, 1 finding missing, 2 setup problem
 plugins/comments/integration/code-review.sh --skip-adopt   # the same repo without adopt: must fail
+plugins/comments/integration/code-review.sh --check <file>  # judge a saved code-review answer only
 ```
 
 It needs `mattpocock-skills` installed and enabled, and a claude.ai subscription login: it unsets

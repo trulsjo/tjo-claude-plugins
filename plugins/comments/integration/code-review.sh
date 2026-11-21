@@ -7,6 +7,7 @@
 #   --skip-adopt  build the repo without running adopt (the check should then fail)
 #   --model       model for both claude -p runs (default: sonnet, to keep the run cheap)
 #   --keep        keep the temporary repo and logs
+#   --check FILE  only judge a saved code-review answer: exit 0 when it holds the finding
 #
 # Exit codes: 0 finding reported, 1 finding missing, 2 setup or environment problem.
 # Bills the Claude Code subscription login only; stops if an API key, Bedrock,
@@ -16,17 +17,46 @@ set -euo pipefail
 model=sonnet
 skip_adopt=0
 keep=0
+check=
 while [ $# -gt 0 ]; do
   case "$1" in
     --skip-adopt) skip_adopt=1 ;;
     --model) model="$2"; shift ;;
     --keep) keep=1 ;;
+    --check) check="${2:-}"; shift ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
 done
 
 die() { echo "SETUP: $*" >&2; exit 2; }
+
+# Reads a code-review answer on stdin and prints the first finding under its Standards heading
+# that both cites comment-standards and names the planted comment ("loop over", "narrat" or
+# class 1) and does not say there is no violation; fails when there is none. A finding is a
+# paragraph or a list item; the Standards section ends at the next heading.
+standards_finding() {
+  awk '
+    /^#+ / { on = ($0 ~ /^#+ *Standards/); flush(); next }
+    !on { next }
+    /^[[:space:]]*$/ { flush(); next }
+    /^[ \t]*([-*]|[0-9]+[.)]) / { flush() }
+    { block = block $0 "\n" }
+    END { flush(); exit !found }
+    function flush() {
+      if (!found && block ~ /comment-standards/ && tolower(block) ~ /loop over|narrat|class 1/ \
+          && tolower(block) !~ /no (violation|finding|issue)s?|nothing to report/) {
+        printf "%s", block; found = 1
+      }
+      block = ""
+    }'
+}
+
+if [ -n "$check" ]; then
+  [ -f "$check" ] || die "no such file: $check"
+  standards_finding < "$check"
+  exit
+fi
 
 # Subscription billing only: no key, token, gateway or cloud provider.
 unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL ANTHROPIC_CUSTOM_HEADERS \
@@ -127,12 +157,9 @@ claude -p "/mattpocock-skills:code-review main" --model "$model" \
   --allowedTools "Bash(git:*)" Read Glob Grep Agent Task Skill --max-budget-usd 3 \
   > "$work/review.txt" 2>&1 || die "code-review run failed; see $work/review.txt (use --keep)"
 
-standards=$(awk '/^#+ *Standards/{on=1; next} /^#+ *Spec/{on=0} on' "$work/review.txt")
-finding=$(grep -iE 'comment-standards|class 1|narrat' <<<"$standards" || true)
-if [ -n "$standards" ] && grep -q 'comment-standards' <<<"$standards" \
-   && grep -qiE 'loop over|cart\.ts' <<<"$standards"; then
+if finding=$(standards_finding < "$work/review.txt"); then
   echo "PASS: code-review reported the comment under Standards:"
-  echo "$finding" | head -5
+  echo "$finding" | head -8
   exit 0
 fi
 echo "FAIL: no finding citing comment-standards.md for the planted comment under Standards." >&2
