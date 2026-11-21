@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-markdown-ignored
+description: "Markdown files in the audited path are out of scope; the only code comment is a contract doc, so the audit reports no findings."
+tags: [audit]
+context:
+  scaffold_script: scaffold.sh

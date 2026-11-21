@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: adopt-fresh
+description: >
+  First adopt in a repo whose CLAUDE.md has no coding-standards heading: the doc is written with
+  the stamp, the whole rubric and an empty Local rules section; CLAUDE.md gains the heading and one
+  entry naming the doc as the coding standard for comments, and keeps its old content.
+  Needs --allow-tools Edit Write.
+tags: [adopt]
+context:
+  scaffold_script: scaffold.sh

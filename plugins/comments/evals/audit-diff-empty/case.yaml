@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: audit-diff-empty
+description: >
+  Auditing since tag v1.2, which points at HEAD in a clean worktree, gives an empty diff:
+  the audit stops with a message saying so, before any classification. Needs --scaffold
+  and --allow-tools Bash.
+tags: [audit, diff]
+context:
+  scaffold_script: scaffold.sh

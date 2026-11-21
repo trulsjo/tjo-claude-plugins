@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-keep-constraint-why
+description: Comments that give a reason the code cannot express are kept; the audit reports no findings.
+tags: [audit, negative]
+context:
+  scaffold_script: scaffold.sh

@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: audit-repo-fix-ignored
+description: >
+  A whole-repo audit asked with --fix applies nothing, because a repo run does not take --fix:
+  it files the report under .scratch, shows the summary with the offer to apply the trivial
+  fixes, and changes no source file. Run it with --allow-tools Edit Write Bash (WSL2 or Linux).
+tags: [audit, repo, fix]
+context:
+  scaffold_script: scaffold.sh

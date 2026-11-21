@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: audit-repo-confirm
+description: >
+  Resumes a whole-repo audit that filed its report under .scratch and ended at the summary and
+  its offer (history.jsonl and scratch/, made by record-history.sh), and answers "yes". The
+  filed report's trivial fixes are applied in the source files; local refactors, tickets and
+  ADRs stay unapplied: no issue is filed and no ADR is written. Run it with
+  --allow-tools Edit Write Bash (WSL2 or Linux).
+tags: [audit, repo, fix]
+context:
+  scaffold_script: scaffold.sh
+  history_file: history.jsonl

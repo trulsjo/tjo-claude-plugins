@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-polyglot-classes
+description: Auditing a Python, C++, shell and YAML fixture that covers all 10 classes and ten keep-list comments classifies the findings right and flags no keeper.
+tags: [audit, classification]
+context:
+  scaffold_script: scaffold.sh

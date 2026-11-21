@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: audit-repo
+description: >
+  A whole-repo audit of a multi-folder fixture (TypeScript, shell, YAML, Python) writes the merged
+  report to a dated file under .scratch, in the path-run format with findings from every folder,
+  shows a summary by class and fix size with the file path in chat, and changes no source file.
+  Run it with --allow-tools Edit Write.
+tags: [audit, repo]
+context:
+  scaffold_script: scaffold.sh

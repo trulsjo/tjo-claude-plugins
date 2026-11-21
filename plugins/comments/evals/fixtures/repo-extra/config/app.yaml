@@ -1,0 +1,7 @@
+server:
+  port: 8080
+  # Timeout raised from 30 to 60 seconds by Kim in March.
+  timeout_seconds: 60
+payments:
+  # The provider closes idle connections after 90 s, so keep-alive must stay below that.
+  keepalive_seconds: 75
