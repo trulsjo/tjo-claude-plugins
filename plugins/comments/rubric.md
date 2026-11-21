@@ -39,6 +39,8 @@ Each finding gets exactly one class. When a comment fits several, pick the lowes
 | 9 | TODO or FIXME with no ticket | Planned work that no ticket tracks. | File a ticket and link it from the TODO, or delete the TODO. | ticket |
 | 10 | API doc that repeats the signature | A doc comment whose text adds nothing to the names and types (`@param cents the cents`). | Delete the noise, or rewrite it with what the reader cannot see. | trivial |
 
+Class 10 compares a doc comment with the names and types only. A tag that states a range, a unit, an error or a special case is contract, even when it repeats the doc's own summary line: `@returns the delay in milliseconds, at most 30000` is kept.
+
 A comment whose real content is *what* the function does, sitting inline in the body, is moved into the function's API doc. That move is its fix, not a missing-docs finding.
 
 ## Fix sizes
