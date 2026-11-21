@@ -155,4 +155,8 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    Report only: no source files were changed.
    ```
 
-   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and, for a waiting ADR, the folder question word for word as the last line: `Create docs/adr/ for these ADRs?` When the request carried `--fix`, the summary's last line is not the one shown above but, word for word: `Report only: no source files were changed. A repo run does not take --fix, so nothing was applied.` Keep it even though the run-type line said so at the start: the summary is what the user reads when the run ends.
+   The reply after the run-type line is these parts, in this order, each left out when it has nothing to say:
+   1. The four lines above. When the request carried `--fix`, the fourth reads, word for word: `Report only: no source files were changed. A repo run does not take --fix, so nothing was applied.` Keep it even though the run-type line said so at the start: the summary is what the user reads when the run ends.
+   2. The trivial offer, word for word with N filled in: `Reply "yes" to apply the N trivial fixes, or name the ones to apply.`
+   3. The ticket and ADR offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, and that a yes to them creates them.
+   4. For a waiting ADR, the folder question, word for word: `Create docs/adr/ for these ADRs?` It is the reply's last line.
