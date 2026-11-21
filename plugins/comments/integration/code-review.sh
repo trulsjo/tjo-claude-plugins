@@ -32,8 +32,9 @@ done
 die() { echo "SETUP: $*" >&2; exit 2; }
 
 # Reads a code-review answer on stdin and prints the first finding under its Standards heading
-# that both cites comment-standards and names the planted comment ("loop over", "narrat" or
-# class 1) and does not say there is no violation; fails when there is none. A finding is a
+# that cites comment-standards, names the planted comment's kind ("loop over", "narrat" or
+# class 1), points at the planted comment (src/cart.ts or its words "loop over") and does not
+# say there is no violation; fails when there is none. A finding is a
 # paragraph or a list item; the Standards section ends at the next heading.
 standards_finding() {
   awk '
@@ -45,6 +46,7 @@ standards_finding() {
     END { flush(); exit !found }
     function flush() {
       if (!found && block ~ /comment-standards/ && tolower(block) ~ /loop over|narrat|class 1/ \
+          && (block ~ /cart\.ts/ || tolower(block) ~ /loop over/) \
           && tolower(block) !~ /no (violation|finding|issue)s?|nothing to report/) {
         printf "%s", block; found = 1
       }
