@@ -103,7 +103,7 @@ How a finding goes from the report into the code. Two things start it: the user'
 
 ## Tickets and ADRs
 
-Ticket and ADR findings are **drafts** until the user confirms them by name or kind, in a reply to the report that showed them. A yes the request already carried ("audit src/ and write the ADRs") comes before the user has seen any draft, so it confirms nothing: that turn files no ticket and writes no ADR, and the report shows the drafts with their offer. A yes covers only what it names: a yes to the ADRs files no ticket.
+Ticket and ADR findings are **drafts** until the user confirms them by name or kind, in a reply to the report that showed them. On a repo run that report is the file under `.scratch/`, which holds every draft in full, and the summary names it. A yes the request already carried ("audit src/ and write the ADRs") comes before the user has seen any draft, so it confirms nothing: that turn files no ticket and writes no ADR, and the report shows the drafts with their offer. A yes covers only what it names: a yes to the ADRs files no ticket.
 
 ### Where a ticket goes
 
@@ -158,5 +158,5 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    The reply after the run-type line is these parts, in this order, each left out when it has nothing to say:
    1. The four lines above. When the request carried `--fix`, the fourth reads, word for word: `Report only: no source files were changed. A repo run does not take --fix, so nothing was applied.` Keep it even though the run-type line said so at the start: the summary is what the user reads when the run ends.
    2. The trivial offer, word for word with N filled in: `Reply "yes" to apply the N trivial fixes, or name the ones to apply.`
-   3. The ticket and ADR offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, and that a yes to them creates them.
+   3. The ticket and ADR offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that their drafts are in the report file, and that a yes to them creates them.
    4. For a waiting ADR, the folder question, word for word: `Create docs/adr/ for these ADRs?` It is the reply's last line.
