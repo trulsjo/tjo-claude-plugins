@@ -1,5 +1,5 @@
 ---
 type: regex
-pattern: 'No findings'
-flags: i
+pattern: '\b0 findings\b[^\n]*\n[\s\S]*^[ \t]*\**No findings\.?\**[ \t]*$'
+flags: mi
 ---
