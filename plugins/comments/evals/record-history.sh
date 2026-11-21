@@ -13,10 +13,16 @@
 # Privacy: the repo is public, and a raw transcript carries account data: ids, the account's
 # email, the org's connector setup (MCP instructions), its skill listing, and local paths.
 # Thinking blocks carry it too: their base64 signature encodes the organization id. So the filter
-# is an allowlist, never a blocklist: it keeps user and assistant entries and the date attachment,
-# and in their messages only text, tool_use and tool_result blocks. Paths under the run's work
-# directory become repo-relative, which the eval also needs, because it resumes in another
-# directory. Parent links are rejoined around the dropped entries.
+# is an allowlist, never a blocklist: it keeps user and assistant entries and the date attachment;
+# of each entry only the fields a replay reads (type, uuid, parentUuid, isSidechain, isMeta,
+# userType, sessionId, cwd, timestamp, version, message, attachment); of each message only role,
+# content, and for an assistant model, type and stop_reason; and of the content only text,
+# tool_use and tool_result blocks. Request, message and prompt ids, tool results' raw payloads
+# and permission data go. The uuids and the session id stay, as a replay links entries by them;
+# the recorder makes the session id itself, a random one. Paths under the run's work directory
+# become repo-relative, which the eval also needs, because it resumes in another directory; the
+# plugin's own path becomes ${CLAUDE_PLUGIN_ROOT}. Parent links are rejoined around the dropped
+# entries.
 set -euo pipefail
 keep_scratch=0
 if [ "${1:-}" = "--keep-scratch" ]; then keep_scratch=1; shift; fi
@@ -40,9 +46,9 @@ transcript="$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects" -name "$sessio
 [ -f "$transcript" ] || { echo "no transcript for session $session; nothing written" >&2; exit 1; }
 # The history and the reports are a pair: both are written to $work first, and the case's copies
 # are replaced only once the filter has accepted the run.
-python3 - "$transcript" "$work/history.jsonl.new" "$work" "$@" <<'PY'
+python3 - "$transcript" "$work/history.jsonl.new" "$work" "$plugin_dir" "$@" <<'PY'
 import json, sys
-src, dst, work, tools = sys.argv[1], sys.argv[2], sys.argv[3], set(sys.argv[4:])
+src, dst, work, plugin_dir, tools = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], set(sys.argv[5:])
 entries = [json.loads(line) for line in open(src, encoding="utf-8")]
 used = {b.get("name") for e in entries if e.get("type") == "assistant"
         for b in e["message"].get("content", []) if isinstance(b, dict) and b.get("type") == "tool_use"}
@@ -52,7 +58,17 @@ for e in entries:
     for field in e:
         if field != "cwd":
             text = json.dumps(e[field], ensure_ascii=False)
-            e[field] = json.loads(text.replace(work + "/", "").replace(work, "."))
+            text = text.replace(work + "/", "").replace(work, ".")
+            e[field] = json.loads(text.replace(plugin_dir, "${CLAUDE_PLUGIN_ROOT}"))
+kept_fields = {"type", "uuid", "parentUuid", "isSidechain", "isMeta", "userType", "sessionId",
+               "cwd", "timestamp", "version", "message", "attachment"}
+kept_message_fields = {"role", "content", "model", "type", "stop_reason"}
+for e in entries:
+    for field in set(e) - kept_fields:
+        del e[field]
+    if isinstance(e.get("message"), dict):
+        for field in set(e["message"]) - kept_message_fields:
+            del e["message"][field]
 kept_attachments = {"date"}
 kept_blocks = {"text", "tool_use", "tool_result"}
 for e in entries:
