@@ -22,7 +22,7 @@
 # the recorder makes the session id itself, a random one. Paths under the run's work directory
 # become repo-relative, which the eval also needs, because it resumes in another directory; the
 # plugin's own path becomes ${CLAUDE_PLUGIN_ROOT}; a background task's output directory becomes
-# tasks/; and each entry's cwd becomes /tmp/comments-eval, so no path of the recording machine
+# tasks/; the home directory (which names the user) becomes ~; and each entry's cwd becomes /tmp/comments-eval, so no path of the recording machine
 # stays. Parent links are rejoined around the dropped entries.
 set -euo pipefail
 keep_scratch=0
@@ -48,7 +48,7 @@ transcript="$(find "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects" -name "$sessio
 # The history and the reports are a pair: both are written to $work first, and the case's copies
 # are replaced only once the filter has accepted the run.
 python3 - "$transcript" "$work/history.jsonl.new" "$work" "$plugin_dir" "$@" <<'PY'
-import json, re, sys
+import json, os, re, sys
 src, dst, work, plugin_dir, tools = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], set(sys.argv[5:])
 # Background tasks write to /tmp/claude-<uid>/<project>/<session id>/tasks/<task>.output.
 task_dir = re.compile(r"/tmp/claude-\d+/[^/\"\s\\]+/[0-9a-f-]{36}/tasks/")
@@ -64,7 +64,8 @@ for e in entries:
         else:
             text = json.dumps(e[field], ensure_ascii=False)
             text = task_dir.sub("tasks/", text.replace(work + "/", "").replace(work, "."))
-            e[field] = json.loads(text.replace(plugin_dir, "${CLAUDE_PLUGIN_ROOT}"))
+            text = text.replace(plugin_dir, "${CLAUDE_PLUGIN_ROOT}")
+            e[field] = json.loads(text.replace(os.path.expanduser("~"), "~"))
 kept_fields = {"type", "uuid", "parentUuid", "isSidechain", "isMeta", "userType", "sessionId",
                "cwd", "timestamp", "version", "message", "attachment"}
 kept_message_fields = {"role", "content", "model", "type", "stop_reason"}
