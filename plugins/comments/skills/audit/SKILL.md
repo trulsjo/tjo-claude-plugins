@@ -30,7 +30,7 @@ A ref or a PR scopes the audit to the **changed comment lines**: comments on the
 1. **Get the diff** from the one command for the target. When it fails, the audit ends there with that target's message, and nothing is classified: the user named this ref or PR, so no other base or local branch stands in for it. Done when you hold the diff text, or have stopped.
    - Ref: `git rev-parse --verify --quiet "<ref>^{commit}"` checks it; on failure the message is `<ref> is not a ref in this repo; nothing was audited.` Then `git diff --merge-base <ref>`: the change since the branch left the ref, uncommitted edits included.
    - PR: `gh pr diff <number>`; on failure the message is `Could not fetch the diff of PR #<number>: <gh's error>. Nothing was audited.`
-2. **Stop on an empty diff**: the diff command piped to `wc -l` prints `0`. An empty diff is the answer for this base. Stop with `The diff since <ref> is empty; nothing was audited.` (for a PR: `PR #<number> has an empty diff; nothing was audited.`). A diff with changes but no changed comment lines is not empty: it gets the normal report with `No findings.`
+2. **Stop on an empty diff**: the diff command piped to `wc -l` prints `0`. An empty diff is the answer for this base: do not look for changes anywhere else (no `git log`, `git show`, other commits or the working tree). Stop with `The diff since <ref> is empty; nothing was audited.` (for a PR: `PR #<number> has an empty diff; nothing was audited.`). A diff with changes but no changed comment lines is not empty: it gets the normal report with `No findings.`
 3. **Widen with `--touched`** when the user passes it or asks for touched code: the scope also takes every comment already inside a **touched function**: the innermost function or method that holds a `+` or `-` line, its doc comment included. Functions the diff does not touch stay outside. Done when you can name each touched function.
 
 Locations in the report are line numbers in the new version of the file. For a PR, read that version at the PR's head (`git fetch origin pull/<number>/head`, then `git show FETCH_HEAD:<path>`); when that fetch fails, judge from the diff hunks, which carry their own line numbers.
@@ -91,7 +91,7 @@ How a finding goes from the report into the code. Two things start it: the user'
 
    Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed, plus the patch and its references for each kept refactor.
 
-3. **Report.** Under `--fix`, return to step 7. After a reply, write the report again in the format above, with the applied findings under `### Applied`. Done when every finding of the last report appears once, applied or not.
+3. **Report.** Under `--fix`, return to step 7. After a reply, write the report again in the format above, with the applied findings under `### Applied` and every other finding under its own fix-size heading, as in the last report: local refactors with their diffs, tickets and ADRs with their drafts. A sentence about them is not enough. Done when every finding of the last report appears once, applied or not.
 
 ## Tickets and ADRs
 
@@ -102,7 +102,7 @@ Ticket and ADR findings are **drafts** until the user confirms them by name or k
 Take the first that applies:
 
 1. **Tracker doc.** The repo documents its issue tracker (a doc such as `docs/agents/issue-tracker.md`, often named from `CLAUDE.md` or `AGENTS.md`). File the ticket the way it says. Labels come from its triage-label doc: the label it maps to the `needs-triage` role, under the repo's own name for it.
-2. **GitHub remote.** No tracker doc, and `git remote -v` (or `.git/config`) shows a `github.com` remote: file it with `gh issue create --title ... --body ...`. Add `--label needs-triage` only when `gh label list` shows the repo has that label.
+2. **GitHub remote.** No tracker doc, and `git remote -v` shows a `github.com` remote (without Bash, Read `.git/config`; never say there is no remote without having checked one of the two): file it with `gh issue create --title ... --body ...`. Add `--label needs-triage` only when `gh label list` shows the repo has that label.
 3. **Neither.** The draft stays in the report; say no tracker was found.
 
 A ticket draft has a title, a body of a few sentences (the work, why it matters, the location and the quoted comment), and a line naming the destination and labels, e.g. `Files to: GitHub example/shop via gh, label triage/new`.
@@ -147,4 +147,4 @@ R3. **Summarise in chat**, in this shape, with sizes and classes that have no fi
    Report only: no source files were changed.
    ```
 
-   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and the folder question for a waiting ADR. When the request carried `--fix`, add one line before the offers: `A repo run does not take --fix, so nothing was applied.`
+   When trivial findings exist, end with the offer line from the report format, word for word with N filled in. When ticket or ADR drafts exist, follow it with their offer, as the report format gives it: where the tickets would be filed (or that no tracker was found), how many ADRs would be written, that a yes to them creates them, and, for a waiting ADR, the folder question word for word as the last line: `Create docs/adr/ for these ADRs?` When the request carried `--fix`, add one line before the offers: `A repo run does not take --fix, so nothing was applied.`
