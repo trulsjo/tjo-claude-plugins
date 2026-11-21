@@ -59,7 +59,7 @@ Close with one line:
 - Nothing applied: `Report only: no files were changed.` When trivial findings exist, add the offer: `Reply "yes" to apply the N trivial fixes, or name the ones to apply.`
 - Fixes applied: `Applied N fixes in M files; nothing else was changed.`
 
-When ticket or ADR drafts remain, follow it with their offer: how many tickets would be filed where, how many ADRs would be written, and that a yes to them creates them. With a waiting ADR, the offer ends with the folder question from [The ADR folder](#the-adr-folder).
+When ticket or ADR drafts remain, follow it with their offer: how many tickets would be filed where, how many ADRs would be written, and that a yes to them creates them. With no tracker, the ticket part is this line, with N filled in: `No tracker was found, so the N ticket drafts stay in the report.` With a waiting ADR, the offer ends with the folder question from [The ADR folder](#the-adr-folder).
 
 ## Confirm and apply
 
@@ -80,7 +80,7 @@ How a finding goes from the report into the code. Two things start it: the user'
 
    The trivial edit: re-read the file, then make one Edit per finding.
    - **Delete**: remove the comment's lines whole, leaving the code and its indentation as they were.
-   - **Move into the API doc**: put the comment's *what* into the function's doc comment, in the file's doc-comment convention (JSDoc above a TypeScript function, a docstring in Python); create the doc comment when there is none. Then delete the inline comment.
+   - **Move into the API doc**: put the comment's *what* into the function's doc comment, keeping every fact it states (each input it names, each limit, each error) and rewording only to fit the convention, in the file's doc-comment convention (JSDoc above a TypeScript function, a docstring in Python); create the doc comment when there is none. Then delete the inline comment.
    - **Rewrite** (class 6 fix, class 10 rewrite): replace the comment text with the fix the report gave.
    - A fix that needs a fact the code does not hold, such as the upstream link for class 4, is not applied: it stays in the report with `Not applied: needs <the fact>`.
 
@@ -138,7 +138,7 @@ R1. **Fan out.** Split the file list into batches of up to 8 files, keeping a fo
 
 R2. **File the report.** Merge the batches' findings into one report in the format above; its opening line counts the whole run. Place its ticket and ADR drafts as step 6 does. Write it to `.scratch/comments-audit-<YYYY-MM-DD>.md` under the repo root, with today's date; when that file exists, add `-2`, `-3` and so on before `.md`. Create the file with the Write tool alone: Write creates `.scratch/` when it is missing. Never run `mkdir` or any other shell command to make the folder, and never write the report anywhere outside `.scratch/`. Done when the file holds every finding from every batch.
 
-R3. **Summarise in chat**, in this shape, with sizes and classes that have no findings left out; the findings themselves stay in the file:
+R3. **Summarise in chat**, in this shape, with sizes and classes that have no findings left out. The findings themselves stay in the file: the chat reply has no finding lines, no `Fix:` lines, no diffs and no draft text, however few the findings are.
 
    ```
    Report: `.scratch/comments-audit-2026-11-20.md` (12 files read, 15 findings)
