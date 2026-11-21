@@ -99,7 +99,7 @@ How a finding goes from the report into the code. Two things start it: the user'
 
    Done when every picked finding is applied or marked `Not applied` with its reason, and re-reading each changed file shows only comment lines changed, plus the patch and its references for each kept refactor.
 
-3. **Report.** Under `--fix`, return to step 7. After a reply, write the report again in the format above, with the applied findings under `### Applied` and every other finding under its own fix-size heading, as in the last report: local refactors with their diffs, tickets and ADRs with their drafts. A sentence about them is not enough. Done when every finding of the last report appears once, applied or not.
+3. **Report.** Under `--fix`, return to step 6. After a reply, write the report again in the format above, with the applied findings under `### Applied` and every other finding under its own fix-size heading, as in the last report: local refactors with their diffs, tickets and ADRs with their drafts. A sentence about them is not enough. Done when every finding of the last report appears once, applied or not.
 
 ## Tickets and ADRs
 
@@ -117,7 +117,7 @@ A ticket draft has a title, a body of a few sentences (the work, why it matters,
 
 ### Where an ADR goes
 
-The repo's ADR folder: `docs/adr/`, or the folder of numbered decision records the repo already keeps. Find it with Glob from the repo root (`docs/adr/*.md`, then `**/adr/*.md` and `**/decisions/*.md`); it exists when a pattern matches. Name the file `NNNN-<slug>.md`, one above the highest number there. The content follows the domain-modeling ADR format:
+The repo's ADR folder: `docs/adr/`, or the folder of numbered decision records the repo already keeps. Find it with Glob from the repo root (`docs/adr/*.md`, then `**/adr/*.md` and `**/decisions/*.md`); it exists when a pattern matches. Name the file `NNNN-<slug>.md`, one above the highest number there, and number a report's drafts on from there in report order, so no two drafts share a number. The content follows the domain-modeling ADR format:
 
 ```md
 # {Short title of the decision}
@@ -129,7 +129,7 @@ Add a `## Considered Options` section only when the rejected option is worth rem
 
 ### The ADR folder
 
-An ADR draft is **ready** when the ADR folder exists and **waiting** when it does not. A waiting draft takes the path `docs/adr/0001-<slug>.md`, and the report's offer ends with the question `Create docs/adr/ for these ADRs?`
+An ADR draft is **ready** when the ADR folder exists and **waiting** when it does not. Waiting drafts take the paths `docs/adr/0001-<slug>.md`, `docs/adr/0002-<slug>.md` and on, in report order, and the report's offer ends with the question `Create docs/adr/ for these ADRs?`
 
 **A yes to the ADRs never covers creating the folder.** Where decisions live is the user's choice of repo structure, so only a yes to that question creates `docs/adr/`. Until that yes, a waiting ADR's folder, file and decision comment stay untouched: no `mkdir`, no file written, no edit. After it, create the folder; the drafts are then ready, and a yes to the ADRs, in the same reply or a later one, writes them.
 
