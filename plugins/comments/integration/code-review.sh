@@ -23,7 +23,7 @@ while [ $# -gt 0 ]; do
     --skip-adopt) skip_adopt=1 ;;
     --model) model="$2"; shift ;;
     --keep) keep=1 ;;
-    --check) check="${2:-}"; shift ;;
+    --check) check="${2:-}"; [ -n "$check" ] || { echo "--check needs a file" >&2; exit 2; }; shift ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
