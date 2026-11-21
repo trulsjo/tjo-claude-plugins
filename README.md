@@ -15,4 +15,4 @@ claude plugin install explainer@tjo-claude-plugins
 claude plugin install comments@tjo-claude-plugins
 ```
 
-Inside Claude Code: `/plugin marketplace add trulsjo/tjo-claude-plugins`, then `/plugin install explainer@tjo-claude-plugins`.
+Inside Claude Code: `/plugin marketplace add trulsjo/tjo-claude-plugins`, then `/plugin install explainer@tjo-claude-plugins` and `/plugin install comments@tjo-claude-plugins`.
