@@ -158,7 +158,7 @@ An ADR draft is **ready** when the ADR folder exists and **waiting** when it doe
 ### On confirmation
 
 - **ADR**: a ready ADR: write the file, then replace the decision comment with its pointer. Report the path. A waiting ADR stays a draft, by [The ADR folder](#the-adr-folder).
-- **Ticket**: create it at its destination, then add its reference to the TODO (`TODO(#57): support express shipping`), except on a PR run whose checkout is not the audited head (see [Diff scope](#diff-scope)), where the TODO stays as it is and the report gives the line to add. Report the number or URL. When creation fails (no login, no network), keep the draft in the report with the error, and leave the TODO as it was.
+- **Ticket**: create it at its destination, then add its reference to the TODO (`TODO(#57): support express shipping`), except on a PR run whose checkout is not the audited head: `git rev-parse HEAD` is not the head commit, or `git status --porcelain -- <the TODO's file>` prints a line (see [Diff scope](#diff-scope)). There the TODO stays as it is and the report gives the line to add. Report the number or URL. When creation fails (no login, no network), keep the draft in the report with the error, and leave the TODO as it was.
 
 ## Repo runs
 
