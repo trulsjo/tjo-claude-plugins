@@ -28,6 +28,8 @@ Two files are in play, both at the repo root's paths:
    | newer version than the plugin | Leave it untouched and tell the user the plugin is older than the installed doc. |
    | exists with no stamp | Leave it untouched and ask the user before replacing it. |
 
+   Write every file of this skill, the doc and `CLAUDE.md`, with the Write or Edit tool alone: Write creates `docs/agents/` when it is missing. Never run `mkdir` or any other shell command to make a folder or a file.
+
    The rubric goes in **verbatim**: copied character for character from `rubric.md`, from its first line to its last, never summarised or reflowed. Done when the doc matches the table's row and a fresh read shows the stamp's version equal to the plugin's (or the row said to leave it).
 
 4. **Link it from CLAUDE.md.** When `CLAUDE.md` already mentions `docs/agents/comment-standards.md`, leave it untouched. Otherwise add the entry under the first heading whose text is `Coding standards` (any level, any case); with no such heading, append `## Coding standards` at the end of `CLAUDE.md`; with no `CLAUDE.md`, create it with that heading. Existing content stays as it was. Done when `CLAUDE.md` mentions the doc on exactly one line, and that line sits under the coding-standards heading.
