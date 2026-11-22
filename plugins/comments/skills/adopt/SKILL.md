@@ -5,7 +5,7 @@ description: Install the comment rubric in a repo as its coding standard for com
 
 # adopt
 
-Installs the plugin's rubric into the current repo as a **coding standard**, so every review tool that reads the repo's standards (`mattpocock-skills:code-review`, the built-in `/code-review`) enforces it with no plugin installed. The run is **idempotent**: a repo already on this version comes out byte-identical.
+Installs the plugin's rubric into the current repo as a **coding standard** that reviews can apply with no plugin installed: `mattpocock-skills:code-review` finds it in its standards search, and the built-in `/code-review` can reach it through the link in CLAUDE.md. The run is **idempotent**: a repo already on this version comes out byte-identical.
 
 Two files are in play, both at the repo root's paths:
 
