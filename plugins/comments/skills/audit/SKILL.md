@@ -59,12 +59,12 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
 - A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Build it from the file as read: each `-` line is a line of the file copied character for character, never one written from memory, and the `+` lines change every use of a renamed name in the function, not only its declaration. Every line between the first and last changed line that stays as it is appears as a context line (a leading space), so the hunk matches the file line for line. Each changed line's `-` and `+` stand together at its place in the file, and each context line appears once:
 
   ```diff
-  -  // n is the number of tokens left in the bucket
-  -  let n = capacity;
-  +  let tokensLeft = capacity;
-     // The scheduler refills at most once per tick.
-  -  return n > 0;
-  +  return tokensLeft > 0;
+  -  // s is the number of seats still free at the venue
+  -  const s = maxSeats - booked;
+  +  const freeSeats = maxSeats - booked;
+     // The venue's fire permit caps the hall at maxSeats.
+  -  return s > 0;
+  +  return freeSeats > 0;
   ``` Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
 
 Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line, then `No findings.` on a line of its own, then the kept list if there is one:
