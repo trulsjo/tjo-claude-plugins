@@ -55,7 +55,7 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
   Fix: delete the comment.
 ```
 
-- **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add.
+- **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add. For a move into the API doc, the Fix shows the doc comment it would write: the whole comment's words, only the markers changed (for `// Seats still free at the venue, never below 0.` the Fix reads ``Fix: move into the API doc as `/** Seats still free at the venue, never below 0. */`.``), never a part of it or a summary, so a yes applies exactly that text.
 - A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Build it from the file as read: each `-` line is a line of the file copied character for character, never one written from memory, and the `+` lines change every use of a renamed name in the function, not only its declaration. Every line between the first and last changed line that stays as it is appears as a context line (a leading space), so the hunk matches the file line for line. Each changed line's `-` and `+` stand together at its place in the file, and each context line appears once:
 
   ```diff
