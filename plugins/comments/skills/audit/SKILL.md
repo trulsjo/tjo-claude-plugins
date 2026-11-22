@@ -56,7 +56,7 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
 ```
 
 - **Fix** follows the class's default action and names the concrete change: the new name for a rename, the function to extract, the link to add.
-- A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Build it from the file as read: each `-` line is a line of the file copied character for character, never one written from memory, and the `+` lines change every use of a renamed name in the function, not only its declaration. Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
+- A local refactor carries the patch as a diff block: the rename or extract, and the removal of the comment it makes unnecessary. Build it from the file as read: each `-` line is a line of the file copied character for character, never one written from memory, and the `+` lines change every use of a renamed name in the function, not only its declaration. Every line between the first and last changed line that stays as it is appears as a context line (a leading space), so the hunk matches the file line for line. Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
 
 Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line, then `No findings.` on a line of its own, then the kept list if there is one:
 
