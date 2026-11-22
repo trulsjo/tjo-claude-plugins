@@ -145,9 +145,9 @@ The repo's ADR folder: `docs/adr/`, or the folder of numbered decision records t
 {1-3 sentences: the context, what was decided, and why.}
 ```
 
-The ADR keeps every fact of the decision comment it replaces: each option it names and each reason it gives, so the pointer loses nothing. It adds no fact of its own: every claim in it is stated by that comment or shown by the code, so no speed, cost or process the source does not give. So the ADR's text under its title is the decision comment itself: its words copied as they stand, only the comment markers removed and its lines joined into sentences, as the move into an API doc copies them. Do not recast it ("X was chosen over Y", "Y took two seconds, so X"), change a number's form ("two seconds" stays "two seconds", not "2 seconds") or summarise it. A `## Considered Options` section may follow it, built from the same words.
+The ADR keeps every fact of the decision comment it replaces: each option it names and each reason it gives, so the pointer loses nothing. It adds no fact of its own: every claim in it is stated by that comment or shown by the code, so no speed, cost or process the source does not give. So the ADR's text under its title is the decision comment itself: its words copied as they stand, only the comment markers removed and its lines joined into sentences, as the move into an API doc copies them. Do not recast it ("X was chosen over Y", "Y took two seconds, so X"), change a number's form ("two seconds" stays "two seconds", not "2 seconds") or summarise it. Nothing follows that text: no `## Considered Options` or other section, as the comment already names each option and its reasons.
 
-Add a `## Considered Options` section only when the rejected option is worth remembering. The draft also shows the pointer that replaces the decision comment: one line in the file's comment syntax, e.g. `// Decision: docs/adr/0002-static-zone-rate-table.md`.
+The draft also shows the pointer that replaces the decision comment: one line in the file's comment syntax, e.g. `// Decision: docs/adr/0002-static-zone-rate-table.md`.
 
 ### The ADR folder
 
