@@ -88,8 +88,11 @@ writes two things:
   ```
 
 The copy lives in the repo, so teammates and review tools get the rules without the plugin:
-`mattpocock-skills:code-review` finds it in its standards search and the built-in `/code-review`
-reads it through CLAUDE.md.
+`mattpocock-skills:code-review` finds it in its standards search, and the built-in `/code-review`
+can reach it through the link in CLAUDE.md. Measured on one small TypeScript diff (2026-11-22,
+Claude Code 2.1.330, medium effort, Sonnet): in three runs the built-in reported all four planted
+comments each time and cited the doc in two. Three runs with no CLAUDE.md entry reported the same
+comments and cited the doc in one, so what the link was seen to add is the citation.
 
 Running adopt again with the same plugin version changes nothing. With a newer version it replaces
 everything above `## Local rules` and updates the stamp; the local rules stay as they were. A doc
