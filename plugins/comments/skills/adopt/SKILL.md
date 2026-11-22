@@ -32,7 +32,7 @@ Two files are in play, both at the repo root's paths:
 
    The rubric goes in **verbatim**: copied character for character from `rubric.md`, from its first line to its last, never summarised or reflowed. Done when the doc matches the table's row and a fresh read shows the stamp's version equal to the plugin's (or the row said to leave it).
 
-4. **Link it from CLAUDE.md.** When `CLAUDE.md` already mentions `docs/agents/comment-standards.md`, leave it untouched. Otherwise add the entry under the first heading whose text is `Coding standards` (any level, any case); with no such heading, append `## Coding standards` at the end of `CLAUDE.md`; with no `CLAUDE.md`, create it with that heading. Existing content stays as it was. Done when `CLAUDE.md` mentions the doc on exactly one line, and that line sits under the coding-standards heading.
+4. **Link it from CLAUDE.md.** When `CLAUDE.md` already mentions `docs/agents/comment-standards.md`, leave it untouched. Otherwise add the entry under the first heading whose text is `Coding standards` (any level, any case); with no such heading, append `## Coding standards` at the end of `CLAUDE.md`, after its last line and below every section it has, never before an existing heading: an Edit whose `old_string` is the file's last line, and whose `new_string` is that line, a blank line, the heading, a blank line and the entry; with no `CLAUDE.md`, create it with that heading. Existing content stays as it was. Done when `CLAUDE.md` mentions the doc on exactly one line, and that line sits under the coding-standards heading.
 
 5. **Report** in chat: the plugin version, and for each file one of `created`, `updated from <old version>`, `unchanged`. Done when both files are named.
 
