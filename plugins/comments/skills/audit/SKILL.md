@@ -82,7 +82,7 @@ When ticket or ADR drafts remain, follow it with their offer: how many tickets w
 
 How a finding goes from the report into the code. Two things start it: the user's reply to the report's offer, in a turn after the report, or `--fix` (step 5).
 
-1. **Pick the findings.** A bare yes ("yes", "apply them", "go ahead") covers every trivial finding in the last report, and nothing else, even when the report's last line is the folder question: it creates no folder, writes no ADR and files no ticket. A reply that names findings, by location, quoted comment or kind ("file the tickets", "write the ADRs"), covers those. `--fix` covers every trivial finding of this run. Other replies are not a yes: answer them and change nothing. Done when you have the list of findings to apply, each with its fix size.
+1. **Pick the findings.** A bare yes ("yes", "apply them", "go ahead") covers every trivial finding in the last report, and nothing else, even when the report's last line is the folder question: it creates no folder, writes no ADR and files no ticket. When the last report has no trivial finding, a bare yes covers nothing: change nothing, say so, and give the replies that would act on what the report offered, each one only when the report offered it: `create docs/adr/` (the folder question), `write the ADRs`, `file the tickets`, or a named refactor. A reply that names findings, by location, quoted comment or kind ("file the tickets", "write the ADRs"), covers those. `--fix` covers every trivial finding of this run. Other replies are not a yes: answer them and change nothing. Done when you have the list of findings to apply, each with its fix size.
 
 2. **Apply each finding** by its fix size:
 
