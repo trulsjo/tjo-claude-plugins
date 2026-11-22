@@ -82,7 +82,7 @@ When ticket or ADR drafts remain, follow it with their offer: how many tickets w
 
 How a finding goes from the report into the code. Two things start it: the user's reply to the report's offer, in a turn after the report, or `--fix` (step 5).
 
-1. **Pick the findings.** A bare yes ("yes", "apply them", "go ahead") covers every trivial finding in the last report. A reply that names findings, by location, quoted comment or kind ("file the tickets", "write the ADRs"), covers those. `--fix` covers every trivial finding of this run. Other replies are not a yes: answer them and change nothing. Done when you have the list of findings to apply, each with its fix size.
+1. **Pick the findings.** A bare yes ("yes", "apply them", "go ahead") covers every trivial finding in the last report, and nothing else, even when the report's last line is the folder question: it creates no folder, writes no ADR and files no ticket. A reply that names findings, by location, quoted comment or kind ("file the tickets", "write the ADRs"), covers those. `--fix` covers every trivial finding of this run. Other replies are not a yes: answer them and change nothing. Done when you have the list of findings to apply, each with its fix size.
 
 2. **Apply each finding** by its fix size:
 
@@ -142,7 +142,7 @@ Add a `## Considered Options` section only when the rejected option is worth rem
 
 An ADR draft is **ready** when the ADR folder exists and **waiting** when it does not. Waiting drafts take the paths `docs/adr/0001-<slug>.md`, `docs/adr/0002-<slug>.md` and on, in report order, and the report's offer ends with the question `Create docs/adr/ for these ADRs?`
 
-**A yes to the ADRs never covers creating the folder.** Where decisions live is the user's choice of repo structure, so only a yes to that question creates `docs/adr/`. Until that yes, a waiting ADR's folder, file and decision comment stay untouched: no `mkdir`, no file written, no edit. After it, create the folder; the drafts are then ready, and a yes to the ADRs, in the same reply or a later one, writes them.
+**A yes to the ADRs never covers creating the folder.** Where decisions live is the user's choice of repo structure, so only a yes to that question creates `docs/adr/`, and only a reply that names the folder ("create the folder", "yes, create docs/adr/") is one: a bare yes answers the trivial offer, by [Confirm and apply](#confirm-and-apply). Until that yes, a waiting ADR's folder, file and decision comment stay untouched: no `mkdir`, no file written, no edit. After it, create the folder; the drafts are then ready, and a yes to the ADRs, in the same reply or a later one, writes them.
 
 ### On confirmation
 
