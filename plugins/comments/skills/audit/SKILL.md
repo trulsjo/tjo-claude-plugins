@@ -65,7 +65,9 @@ Groups in this order, each a heading, empty groups left out: `### Trivial`, `###
      // The venue's fire permit caps the hall at maxSeats.
   -  return s > 0;
   +  return freeSeats > 0;
-  ``` Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
+  ```
+
+- Ticket and ADR findings carry the drafts described in [Tickets and ADRs](#tickets-and-adrs).
 
 Open the report with one line: the scope, the number of files read, and the finding count per class. With no findings the report is that line, then `No findings.` on a line of its own, then the kept list if there is one:
 
