@@ -10,56 +10,51 @@ By class: class 1: 2, class 2: 1, class 3: 1, class 4: 1, class 5: 1, class 6: 1
 
 - `shop/src/cart.ts:12` - class 1 (narrates the how)
   > `// loop over the items and add up price times quantity`
-
   Fix: delete the comment.
 
-- `shop/src/cart.ts:25-28` - class 10 (API doc repeats the signature)
-  > `/** Formats cents. @param cents the cents @returns the string */`
+- `shop/src/cart.ts:24` - class 10 (API doc repeats the signature)
+  > `/**`
+  > ` * Formats cents.`
+  > ` * @param cents the cents`
+  > ` * @returns the string`
+  > ` */`
+  Fix: delete the comment. "Formats cents" restates the function name; both tags add nothing to the names and types.
 
-  Fix: delete the doc comment. `formatCents(cents: number): string` already carries every fact these lines state.
-
-- `shop/src/cart.ts:30-31` - class 7 (commented-out code)
+- `shop/src/cart.ts:30` - class 7 (commented-out code)
   > `// const euros = Math.floor(cents / 100);`
   > `// return euros + "," + (cents % 100);`
+  Fix: delete; git keeps it.
 
-  Fix: delete both lines.
-
-- `shop/src/dates.ts:8` - class 4 (workaround outside our control, no link)
+- `shop/src/dates.ts:8` - class 4 (workaround with no link)
   > `// Node's Intl date math skips DST changes in some time zones, so count in UTC milliseconds.`
-
-  Fix: append a link to the upstream Node.js or V8 issue tracking this Intl DST behaviour. The repo does not hold a URL for it; the link should point to the relevant report on the Node.js GitHub issue tracker or the V8 bug tracker. Leave the comment's text as it is.
+  Fix: append a link to the upstream Node.js or V8 issue documenting the DST-skipping behaviour. The repo does not hold such a URL; the link should point to the relevant Node.js GitHub issue (https://github.com/nodejs/node/issues) or V8 bug report for Intl timezone/DST handling.
 
 - `shop/src/shipping.ts:1` - class 8 (history or changelog)
   > `// Changed in v2.3: now uses the zone table instead of the flat 499-cent rate.`
-
-  Fix: delete the comment.
+  Fix: delete; history lives in commit messages.
 
 - `shop/src/shipping.ts:4` - class 6 (stale or lying)
   > `// Returns the flat rate for parcels over 20 kg.`
+  Fix: delete the comment. The code returns `rate * Math.ceil(weightGrams / 1000)` — a per-kilogram weighted rate for any weight — with no 20 kg threshold and no flat rate.
 
-  Fix: delete the comment. The function computes `rate * Math.ceil(weightGrams / 1000)` — a per-kilogram charge for any parcel weight, not a flat rate and not restricted to parcels over 20 kg.
-
-- `tools/report.py:5-9` - class 10 (API doc repeats the signature)
+- `tools/report.py:5` - class 10 (API doc repeats the signature)
   > `"""Builds report.`
-  > `:param rows: the rows`
-  > `:param path: the path`
-  > `"""`
+  > ` `
+  > `    :param rows: the rows`
+  > `    :param path: the path`
+  > `    """`
+  Fix: delete the doc comment. The summary restates the function name; both `:param` lines add nothing to the parameter names.
 
-  Fix: delete the docstring. `build_report(rows, path)` already carries every fact these lines state.
-
-- `tools/report.py:12` - class 7 (commented-out code)
+- `tools/report.py:13` - class 7 (commented-out code)
   > `# print(rows)`
-
-  Fix: delete the line.
+  Fix: delete; git keeps it.
 
 - `config/app.yaml:3` - class 8 (history or changelog)
   > `# Timeout raised from 30 to 60 seconds by Kim in March.`
-
-  Fix: delete the comment.
+  Fix: delete the comment. History lives in commit messages.
 
 - `scripts/deploy.sh:8` - class 1 (narrates the how)
   > `# copy the build output to the server with rsync`
-
   Fix: delete the comment.
 
 ---
@@ -68,7 +63,6 @@ By class: class 1: 2, class 2: 1, class 3: 1, class 4: 1, class 5: 1, class 6: 1
 
 - `shop/src/cart.ts:18` - class 2 (compensates for naming)
   > `// d is the discount as a fraction between 0 and 1`
-
   Fix: rename `d` to `discountFraction`, then delete the comment.
 
   ```diff
@@ -84,55 +78,51 @@ By class: class 1: 2, class 2: 1, class 3: 1, class 4: 1, class 5: 1, class 6: 1
 
 ### Ticket
 
-- `shop/src/coupon.ts:4-5` - class 3 (workaround in our own code; cause is outside the files in scope)
+- `shop/src/coupon.ts:4` - class 3 (workaround in our own code)
   > `// checkout.ts retries the payment step and calls applyCoupon a second time,`
   > `// so remember applied codes here and skip them on the second call.`
-
-  Fix: file a ticket to fix the retry logic in `checkout.ts` so it calls `applyCoupon` at most once per checkout, then remove the `applied` Set and its guard from `coupon.ts`.
+  The cause lies in `checkout.ts`, which is outside the files in scope; removing the guard while the retry remains would reintroduce the bug.
 
   **Draft ticket**
-  Title: Remove double-apply guard in `applyCoupon` after fixing retry in `checkout.ts`
-  Body: `shop/src/coupon.ts` holds a module-level `applied` Set that silently skips a second `applyCoupon` call with the same coupon code. This workaround exists because `checkout.ts` retries the payment step and calls `applyCoupon` twice per checkout. The guard masks the root cause and could hide legitimate double-apply bugs. Work: (1) fix the retry logic in `checkout.ts` so it calls `applyCoupon` at most once per checkout; (2) remove the `applied` Set and the `if (applied.has(code)) return totalCents;` guard from `shop/src/coupon.ts`.
-  Files to: no tracker found — draft stays in report.
+  Title: `Remove coupon deduplication guard from applyCoupon`
+  Body: `applyCoupon` in `shop/src/coupon.ts` maintains a module-level `applied` Set (lines 1–8) to guard against double-application when `checkout.ts` retries the payment step and calls `applyCoupon` a second time. The workaround is at lines 4–6. The root cause is in `checkout.ts`: the payment retry path re-invokes `applyCoupon` instead of skipping the coupon step. Work: (1) fix `checkout.ts` so payment retries do not call `applyCoupon` again; (2) once that is done, remove the `applied` Set and its guard from `coupon.ts`.
+  Files to: no tracker was found, so this draft stays in the report.
 
 - `shop/src/shipping.ts:3` - class 9 (TODO with no ticket)
   > `// TODO: support express shipping`
-
-  Fix: file a ticket for express-shipping support and link it from the TODO (`TODO(#N): support express shipping`).
+  Fix: file a ticket and link it from the TODO.
 
   **Draft ticket**
-  Title: Support express shipping in `shippingCents`
-  Body: `shop/src/shipping.ts:3` contains `// TODO: support express shipping`. The `shippingCents` function only computes standard zone-rate shipping via `ZONE_RATES`; there is no express tier. File a ticket to track the design and implementation of express shipping support, then update the TODO to reference the ticket number.
-  Files to: no tracker found — draft stays in report.
+  Title: `Support express shipping in shippingCents`
+  Body: `shippingCents` in `shop/src/shipping.ts` does not handle express shipping; a TODO at line 3 notes this but names no ticket. The current implementation only supports zone-based ground rates from `ZONE_RATES`. Work: decide on an express-shipping rate model, add it to `shippingCents`, and update the TODO to reference this ticket (`TODO(#N): support express shipping`), or delete the TODO if the work is not planned.
+  Files to: no tracker was found, so this draft stays in the report.
 
 - `scripts/deploy.sh:7` - class 9 (TODO with no ticket)
   > `# TODO: retry the upload when the network drops`
-
-  Fix: file a ticket for upload retry logic and link it from the TODO (`# TODO(#N): retry the upload when the network drops`).
+  Fix: file a ticket and link it from the TODO.
 
   **Draft ticket**
-  Title: Retry rsync upload on network failure in `scripts/deploy.sh`
-  Body: The deploy script's upload step has no retry logic. If the network drops mid-deployment, the script fails with no recovery. The work is to add retry logic (e.g. a loop or a `--retries`-style wrapper) around the `rsync` call in `scripts/deploy.sh`. Location: `scripts/deploy.sh:7` — `# TODO: retry the upload when the network drops`.
-  Files to: no tracker found — draft stays in report.
+  Title: `Add retry logic to rsync upload in deploy.sh when network drops`
+  Body: The deploy script's rsync call has no retry on network failure. A transient drop will abort the deployment with no recovery. This work is tracked by an unlinked TODO at `scripts/deploy.sh:7`: `# TODO: retry the upload when the network drops`. Once a ticket is filed, link it in the TODO (`TODO(#N): retry the upload when the network drops`).
+  Files to: no tracker was found, so this draft stays in the report.
 
 ---
 
 ### ADR
 
-- `shop/src/shipping.ts:9-10` - class 5 (records a decision)
+- `shop/src/shipping.ts:9` - class 5 (records a decision)
   > `// We chose a static zone table over the carrier's rate API because the API`
   > `// took two seconds per call and blocked checkout, and rates change once a year.`
+  Fix: move into an ADR and leave a one-line pointer.
 
-  Fix: move into `docs/adr/0001-static-zone-rate-table.md` and replace lines 9-10 with `// Decision: docs/adr/0001-static-zone-rate-table.md`.
-
-  **Draft ADR** (`docs/adr/0001-static-zone-rate-table.md`) — waiting (folder does not exist)
+  **Draft — `docs/adr/0001-static-zone-rate-table.md`**:
   ```md
-  # Static zone rate table over carrier rate API
+  # Use a static zone table instead of the carrier's rate API
 
-  We chose a static zone table over the carrier's rate API because the API
-  took two seconds per call and blocked checkout, and rates change once a year.
+  We chose a static zone table over the carrier's rate API because the API took two seconds per call and blocked checkout, and rates change once a year.
   ```
-  Pointer to replace lines 9-10: `// Decision: docs/adr/0001-static-zone-rate-table.md`
+  Pointer that replaces the comment: `// Decision: docs/adr/0001-static-zone-rate-table.md`
+  Status: **waiting** — no `docs/adr/` folder found.
 
 ---
 
