@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: audit-repo-kept-list
+description: >
+  A whole-repo audit where the repo's coding standard requires a docstring on every function: the
+  filed report holds the narrating comment and the commented-out code as findings, then the two
+  docstrings under Kept by repo rules, with no class on them, so the kept list survives the
+  sub-agents and the merge. Run it with --allow-tools Edit Write.
+tags: [audit, repo]
+context:
+  scaffold_script: scaffold.sh
