@@ -1,0 +1,5 @@
+database:
+  # PgBouncer in transaction mode breaks server-side prepared statements, so turn them off.
+  # See https://www.pgbouncer.org/features.html#sql-feature-map-for-pooling-modes
+  prepared_statements: false
+  pool_size: 10

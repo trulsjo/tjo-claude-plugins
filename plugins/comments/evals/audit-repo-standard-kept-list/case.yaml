@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-repo-standard-kept-list
+description: "The repo's coding standards require a docstring on every function, and the file also holds a narrating comment and commented-out code; the report lists both findings, then the two docstrings under Kept by repo rules with no class."
+tags: [audit]
+context:
+  scaffold_script: scaffold.sh

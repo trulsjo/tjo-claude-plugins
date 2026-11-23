@@ -1,0 +1,12 @@
+schema_version: "1.1"
+name: audit-adr-yes
+description: >
+  Resumes an audit whose request already asked for the ADRs and which, by design, ended at the
+  report with the ADR draft and its offer (history.jsonl, made by record-history.sh). The next
+  turn says yes to the ADRs: in a repo with an ADR folder, the decision comment's ADR is written
+  as docs/adr/0002-*.md, the comment shrinks to a pointer to it, and no ticket is filed. Run it
+  with --allow-tools Edit Write Bash (WSL2 or Linux).
+tags: [audit, adr]
+context:
+  scaffold_script: scaffold.sh
+  history_file: history.jsonl

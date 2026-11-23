@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: audit-fix
+description: >
+  An audit with --fix applies the trivial fixes without asking: the narrating and commented-out
+  comments are deleted and an inline what-comment moves into the function's API doc. Local
+  refactors, tickets and ADRs stay in the report, unapplied: no issue is filed and no ADR is
+  written. Run it with --allow-tools Edit Write Bash (WSL2 or Linux).
+tags: [audit, fix]
+context:
+  scaffold_script: scaffold.sh

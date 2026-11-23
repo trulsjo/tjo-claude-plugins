@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: audit-pr-unreachable
+description: >
+  PR mode takes the base and head from one fetch of the PR's repository. Eval runs have no gh
+  login, no network and no remote, so the fetch fails: the audit stops with a message naming the PR, before any
+  classification, and does not fall back to a local diff. The success path (PR diff audited
+  like a ref diff) is not covered here. Needs --scaffold and --allow-tools Bash.
+tags: [audit, diff, pr]
+context:
+  scaffold_script: scaffold.sh

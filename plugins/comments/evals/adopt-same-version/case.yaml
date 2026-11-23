@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: adopt-same-version
+description: >
+  Adopt in a repo already adopted at the plugin's version changes nothing: no Edit or Write call,
+  no Bash call that writes the doc or CLAUDE.md. Needs --allow-tools Edit Write (Bash optional).
+tags: [adopt]
+context:
+  scaffold_script: scaffold.sh

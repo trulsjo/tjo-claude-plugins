@@ -1,0 +1,9 @@
+schema_version: "1.1"
+name: audit-diff-scope
+description: >
+  Diff mode reports only the comment lines the diff adds or changes: a narrating comment
+  already on main, inside the function the diff touches, is not reported. Needs --scaffold
+  and --allow-tools Bash.
+tags: [audit, diff]
+context:
+  scaffold_script: scaffold.sh

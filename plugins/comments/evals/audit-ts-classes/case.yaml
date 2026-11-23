@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: audit-ts-classes
+description: Auditing a TypeScript fixture with one comment per class and six keep-list comments classifies the findings right and flags no keeper.
+tags: [audit, classification]
+context:
+  scaffold_script: scaffold.sh
